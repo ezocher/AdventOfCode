@@ -1,20 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
 using AdventOfCode.Core;
 
 namespace AdventOfCode {
     public partial class Program {
         public static void Main(string[] args) {
+            const int Year = 2021;
+            const int Day = 8;
 
-            // TODO: Figure out manual and automated workflow wrt test input and description refetching for part 2
-            //       Objective is to only edit Program.cs once per puzzle day 
-            // TODO: Refactor into ?? FetchInput(), FetchDescription(), GeneratePuzzleTemplate()
+            const bool Solved = false;
 
-            
-            Tools.GeneratePuzzleTemplate(SESSION, 2021, 8);
+            // Before puzzle release:
+            // Log in to AoC and verify/update session cookie (if necessary)
 
-            Runner.AdventYear(2021);
+            // At puzzle release:
+            // These both do nothing if files have already been downloaded/generated
+            // TODO: Tools.FetchInputs(SESSION, Year, Day); // If no input, fetch main input and generate empty test input file 
+            Tools.GeneratePuzzleTemplate(SESSION, Year, Day); // Gets description and generates puzzle class file
 
+            // Developing and running solution:
+            Runner.AdventYear(Year, Day);
+
+            // After Solving:
+            if (Solved)
+            {
+                // TODO: Tools.DownloadDescription(Year, Day);   // Get description including part 2
+                Runner.WriteLine("\nReminder: add final solutions to names of input files\n", ConsoleColor.Red);
+                Runner.WriteLine("Reminder: update README.md", ConsoleColor.Red);
+            }
         }
     }
 }
