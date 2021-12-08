@@ -14,7 +14,7 @@ namespace AdventOfCode {
 
             // At puzzle release:
             // These both do nothing if files have already been downloaded/generated
-            // TODO: Tools.FetchInputs(SESSION, Year, Day); // If no input, fetch main input and generate empty test input file 
+            Tools.DownloadInput(SESSION, Year, Day); // If no input, fetch puzzle input and generate empty test input file 
             Tools.GeneratePuzzleTemplate(SESSION, Year, Day); // Gets description and generates puzzle class file
 
             // Developing and running solution:
@@ -23,7 +23,7 @@ namespace AdventOfCode {
             // After Solving:
             if (Solved)
             {
-                // TODO: Tools.DownloadDescription(Year, Day);   // Get description including part 2
+                Tools.DownloadDescription(SESSION, Year, Day);   // Get description including part 2
                 Runner.WriteLine("\nReminder: add final solutions to names of input files\n", ConsoleColor.Red);
                 Runner.WriteLine("Reminder: update README.md", ConsoleColor.Red);
             }

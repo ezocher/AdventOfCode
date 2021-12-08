@@ -13,6 +13,23 @@ namespace AdventOfCode.Core {
             return runningExePath.Substring(0, runningExePath.IndexOf(@"\bin\"));
         }
 
+        // If no input, fetch puzzle input and generate empty test input file
+        // This does nothing if files have already been downloaded/generated
+        public static void DownloadInput(string session, int year, int day)
+        {
+            string path = GetSolutionRootPath();
+        }
+
+        // Downloads or re-downloads puzzle description from aoc.com
+        public static string DownloadDescription(string session, int year, int day)
+        {
+            string path = GetSolutionRootPath();
+
+            return String.Empty;
+        }
+
+        // Download puzzle description and generate Puzzle class file
+        // This does nothing if file has already been generated
         public static void GeneratePuzzleTemplate(string session, int year, int day) {
             Console.WriteLine($"Generating Template for {year}-{day}");
 
