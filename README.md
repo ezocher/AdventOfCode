@@ -12,4 +12,4 @@ https://adventofcode.com/
 ### Puzzles Completed
 | Year | Stars | Completed |
  ------------- | ------------- | ------------- |
- 2021 | 16 :star:| 1-8 |
+ 2021 | 18 :star:| 1-9 |
