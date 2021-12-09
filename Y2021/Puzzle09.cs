@@ -56,27 +56,23 @@ namespace AdventOfCode.Y2021
 
         private bool LowPointAt(int r, int c)
         {
-            int checkDepth = heightmap[r, c];
+            int depth = heightmap[r, c];
 
             // Check above (if there is a value above)
             if (r > 0)
-                if (!(checkDepth < heightmap[r - 1, c]))
-                    return false;
+                if (!(depth < heightmap[r - 1, c])) return false;
 
             // Check below
             if (r < (rows - 1))
-                if (!(checkDepth < heightmap[r + 1, c]))
-                    return false;
+                if (!(depth < heightmap[r + 1, c])) return false;
 
             // Check left
             if (c > 0)
-                if (!(checkDepth < heightmap[r, c - 1]))
-                    return false;
+                if (!(depth < heightmap[r, c - 1])) return false;
 
             // Check right
             if (c < (cols - 1))
-                if (!(checkDepth < heightmap[r, c + 1]))
-                    return false;
+                if (!(depth < heightmap[r, c + 1])) return false;
 
             return true;
         }
@@ -87,9 +83,7 @@ namespace AdventOfCode.Y2021
             List<(int, int)> lowPoints = FindLowPointLocations();
 
             foreach ((int r, int c) in lowPoints)
-            {
                 basinSizes.Add(BasinSize(r, c));
-            }
 
             return basinSizes;
         }
@@ -126,11 +120,10 @@ namespace AdventOfCode.Y2021
         public override string SolvePart1()
         {
             List<int> lowPoints = FindLowPointDepths();
+
             int totalOfRiskLevels = 0;
             foreach (int lowPoint in lowPoints)
-            {
                 totalOfRiskLevels += lowPoint + 1;
-            }
 
             return totalOfRiskLevels.ToString();
         }
@@ -140,10 +133,9 @@ namespace AdventOfCode.Y2021
         {
             List<int> basinSizes = FindBasinSizes();
             basinSizes.Sort();
+            basinSizes.Reverse();
 
-            int lastIndex = basinSizes.Count - 1;
-            int productOfThreeLargest = basinSizes[lastIndex - 2] * basinSizes[lastIndex - 1] * basinSizes[lastIndex];
-            return productOfThreeLargest.ToString();
+            return (basinSizes[0] * basinSizes[1] * basinSizes[2]).ToString();
         }
     }
 }
