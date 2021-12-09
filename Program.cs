@@ -4,9 +4,11 @@ using AdventOfCode.Core;
 namespace AdventOfCode {
     public partial class Program {
         public static void Main(string[] args) {
-            const int Year = 2021;
-            const int Day = 8;
+            // Run all solutions or run solutions for a specific year
+            // Runner.AdventYear(2021); return;
 
+            const int Year = 2021;
+            const int Day = 9;
             const bool Solved = false;
 
             // Before puzzle release:
@@ -14,7 +16,7 @@ namespace AdventOfCode {
 
             // At puzzle release:
             // These both do nothing if files have already been downloaded/generated
-            Tools.DownloadInput(SESSION, Year, Day); // If no input, fetch puzzle input and generate empty test input file 
+            // Tools.DownloadInput(SESSION, Year, Day); // If no input, fetch puzzle input and generate empty test input file 
             Tools.GeneratePuzzleTemplate(SESSION, Year, Day); // Gets description and generates puzzle class file
 
             // Developing and running solution:
@@ -23,7 +25,7 @@ namespace AdventOfCode {
             // After Solving:
             if (Solved)
             {
-                Tools.DownloadDescription(SESSION, Year, Day);   // Get description including part 2
+                // Tools.DownloadDescription(SESSION, Year, Day);   // Get description including part 2
                 Runner.WriteLine("\nReminder: add final solutions to names of input files\n", ConsoleColor.Red);
                 Runner.WriteLine("Reminder: update README.md", ConsoleColor.Red);
             }
