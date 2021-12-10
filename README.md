@@ -1,5 +1,5 @@
 # AdventOfCode
-Solutions to the Advent of Code programming puzzles in C# .NET 5.
+Solutions to the Advent of Code programming puzzles in C# .NET 5. I'm using .NET 5 so that I don't get too far ahead of what Unity supports.
 
 Originally forked from [ShootMe/AdventOfCode](https://github.com/ShootMe/AdventOfCode) to use their excellent infrastructure, utility classes, and puzzle class templating as a starting point.
 
@@ -11,5 +11,13 @@ https://adventofcode.com/
 
 ### Puzzles Completed
 | Year | Stars | Completed |
- ------------- | ------------- | ------------- |
- 2021 | 20 :star: (AoC++)| 1-10 |
+| ---- | ----- | --------- |
+| 2021 | 20 :star: (AoC++)| 1-10 |
+
+### Superlatives
+| | | |
+| - | - | - |
+| Best Solution | 2021 Puzzle 10 | Solved cleanly and then refactored |
+| Worst Solution | 2021 Puzzle 8 | Prematurely overgeneralized and overcomplicated |
+| Best Finish | 2021 Puzzle 6 Part 2 | 4341st |
+| Worst Finish | 2021 Puzzle 8 Part 2 | 15607th |
