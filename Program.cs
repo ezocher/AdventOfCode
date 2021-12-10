@@ -9,7 +9,7 @@ namespace AdventOfCode {
 
             const int Year = 2021;
             const int Day = 10;
-            const bool Solved = false;
+            const bool Solved = true;
 
             // Before puzzle release:
             // Log in to AoC and verify/update session cookie (if necessary)
