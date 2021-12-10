@@ -9,14 +9,19 @@ namespace AdventOfCode.Y2021
     public class Puzzle10 : ASolver 
     {
         private List<string> lines;
-        private List<long> autocompleteScores;
+
+        private const string OpenChars = "([{<";
+        private const char NoError = ' ';
+
+        private readonly Dictionary<char, int> errorScores = new Dictionary<char, int>() { { NoError, 0 }, { ')', 3 }, { ']', 57 }, { '}', 1197 }, { '>', 25137 } };
+        private readonly Dictionary<char, int> completionScores = new Dictionary<char, int>() { { '(', 1 }, { '[', 2 }, { '{', 3 }, { '<', 4 } };
+        private readonly Dictionary<char, char> matchingPairs = new Dictionary<char, char>() { { '(', ')' }, { '[', ']' }, { '{', '}' }, { '<', '>' } };
 
         public Puzzle10(string input) : base(input) { Name = "Syntax Scoring"; }
 
         public override void Setup()
         {
             lines = Tools.GetLines(Input);
-            autocompleteScores = new List<long>();
         }
 
         private char FindFirstIllegalChar(string line)
@@ -25,7 +30,7 @@ namespace AdventOfCode.Y2021
 
             foreach (char c in line)
             {
-                if (IsOpenChar(c))
+                if (OpenChars.Contains(c))
                     expressionStack.Push(c);
                 else
                 {
@@ -34,43 +39,7 @@ namespace AdventOfCode.Y2021
                         return c;
                 }
             }
-            return ' ';
-        }
-
-        private bool MatchingPair(char openChar, char c)
-        {
-            switch (openChar)
-            {
-                case '(':
-                    return (c == ')');
-                case '[':
-                    return (c == ']');
-                case '{':
-                    return (c == '}');
-                case '<':
-                    return (c == '>');
-                default:
-                    return false;
-            }
-        }
-
-        private bool IsOpenChar(char c) => ("([{<".Contains(c));
-
-        private int ErrorScore(char errorChar)
-        {
-            switch (errorChar)
-            {
-                case ')':
-                    return 3;
-                case ']':
-                    return 57;
-                case '}':
-                    return 1197;
-                case '>':
-                    return 25137;
-                default:
-                    return 0;
-            }
+            return NoError;
         }
 
         private char[] FindIncompleteLine(string line)
@@ -79,7 +48,7 @@ namespace AdventOfCode.Y2021
 
             foreach (char c in line)
             {
-                if (IsOpenChar(c))
+                if (OpenChars.Contains(c))
                     expressionStack.Push(c);
                 else
                 {
@@ -91,28 +60,15 @@ namespace AdventOfCode.Y2021
             return expressionStack.ToArray();
         }
 
-        // completionChars contains the "open" characters that we need to match
+        private bool MatchingPair(char openChar, char c) => (c == matchingPairs[openChar]);
+
+        private int ErrorScore(char errorChar) => errorScores[errorChar];
+
         private long CompletionScore(char[] completionChars)
         {
             long score = 0;
-
             foreach (char c in completionChars)
-            {
-                score *= 5;
-                switch (c)  
-                {
-                    case '(':
-                        score += 1; break;
-                    case '[':
-                        score += 2; break;
-                    case '{':
-                        score += 3; break;
-                    case '<':
-                        score += 4; break;
-                    default:
-                        break;
-                }
-            }
+                score = (score * 5) + completionScores[c];
             return score;
         }
 
@@ -128,6 +84,8 @@ namespace AdventOfCode.Y2021
         [Description("What is the middle score")]
         public override string SolvePart2()
         {
+            List<long> autocompleteScores = new List<long>();
+
             foreach (string line in lines)
             {
                 char[] completionChars = FindIncompleteLine(line);
