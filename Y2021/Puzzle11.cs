@@ -38,6 +38,7 @@ namespace AdventOfCode.Y2021
                 for (int c = 0; c < GridSize; c++)
                     energyLevels[r, c]++;
 
+            // Flash and propagate until there are no more flashes
             int flashesThisPass;
             do
             {
@@ -50,10 +51,10 @@ namespace AdventOfCode.Y2021
                             energyLevels[r, c] = HasFlashed;
                             PropagateFlash(r, c);
                         }
-
                 totalFlashes += flashesThisPass;
             } while (flashesThisPass > 0);
             
+            // Reset energy levels for ones that flashed
             for (int r = 0; r < GridSize; r++)
                 for (int c = 0; c < GridSize; c++)
                     if (energyLevels[r, c] == HasFlashed)
@@ -82,9 +83,7 @@ namespace AdventOfCode.Y2021
             int totalFlashes = 0;
 
             for (int step = 1; step <= Steps; step++)
-            {
                 totalFlashes += RunStep();
-            }
 
             return totalFlashes.ToString();
         }
