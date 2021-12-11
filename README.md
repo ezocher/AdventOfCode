@@ -12,12 +12,12 @@ https://adventofcode.com/
 ### Puzzles Completed
 | Year | Stars | Completed |
 | ---- | ----- | --------- |
-| 2021 | 20 :star: (AoC++)| 1-10 |
+| 2021 | 22 :star: (AoC++)| 1-11 |
 
 ### Superlatives
 | | | |
 | - | - | - |
 | Best Solution | 2021 Puzzle 10 | Solved cleanly and then refactored |
 | Worst Solution | 2021 Puzzle 8 | Prematurely overgeneralized and overcomplicated |
-| Best Finish | 2021 Puzzle 6 Part 2 | 4341st |
+| Best Finish | 2021 Puzzle 11 Part 1 | 2795th |
 | Worst Finish | 2021 Puzzle 8 Part 2 | 15607th |
