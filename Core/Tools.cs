@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 namespace AdventOfCode.Core {
+
+    // TODO: Split Tools into Infrastructure and Tools
     public static partial class Tools {
 
         private static string GetSolutionRootPath() {
@@ -33,7 +35,7 @@ namespace AdventOfCode.Core {
             else
             {
                 // fetch puzzle input
-                using (HttpClient web = GetAdventOfCodeClient(session))
+                using (HttpClient web = AdventOfCodeClient(session))
                 {
                     string html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}/input");
                     File.WriteAllText(Path.Combine(inputFilesPath, $@"puzzle{day:00}--.txt"), html.TrimEnd());
@@ -49,7 +51,7 @@ namespace AdventOfCode.Core {
             }
         }
 
-        private static HttpClient GetAdventOfCodeClient(string session)
+        private static HttpClient AdventOfCodeClient(string session)
         {
             HttpClient web = new HttpClient(new HttpClientHandler() { AutomaticDecompression = System.Net.DecompressionMethods.All });
             web.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("advent-of-code-grabber", "1.0"));
@@ -59,7 +61,6 @@ namespace AdventOfCode.Core {
             web.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html"));
             web.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue() { NoCache = true };
             web.DefaultRequestHeaders.Add("cookie", $"session={session}");
-
             return web;
         }
 
@@ -70,7 +71,7 @@ namespace AdventOfCode.Core {
             string solutionRootPath = GetSolutionRootPath();
             string html;
 
-            using (HttpClient web = GetAdventOfCodeClient(session))
+            using (HttpClient web = AdventOfCodeClient(session))
             {
                 html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}");
             }
@@ -131,6 +132,8 @@ $@"<head>
             // string html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}");
 
             string classPath = Path.Combine(solutionRootPath, $"Y{year}\\Puzzle{day:00}.cs");
+
+            // TODO: Move template into a text file
             if (!File.Exists(classPath)) {
                 string templateClass =
 @$"using AdventOfCode.Common;
@@ -237,9 +240,7 @@ namespace AdventOfCode.Y{year}
             return lines;
         }
 
-
-        // TODO: change this to an extension method of StringBuilder?
-        public static int IndexOf(StringBuilder s, char c, int start)
+        public static int IndexOf(this StringBuilder s, char c, int start)
         {
             if (start >= s.Length)
                 return -1;
@@ -260,9 +261,9 @@ namespace AdventOfCode.Y{year}
             int searchIndex = 0;
             int openTagIndex;
 
-            while ((openTagIndex = IndexOf(output, '<', searchIndex)) != -1)
+            while ((openTagIndex = output.IndexOf('<', searchIndex)) != -1)
             {
-                int closeTagIndex = IndexOf(output, '>', openTagIndex + 1);
+                int closeTagIndex = output.IndexOf('>', openTagIndex + 1);
                 if (closeTagIndex == -1)
                     break;
                 output.Remove(openTagIndex, closeTagIndex - openTagIndex + 1);
@@ -295,6 +296,7 @@ namespace AdventOfCode.Y{year}
             sections.Add(section.ToString());
             return sections;
         }
+
         public static int[] GetNumbers(string input, char splitChar = '\n') {
             List<int> numbers = new List<int>();
             int startIndex = 0;
@@ -308,6 +310,7 @@ namespace AdventOfCode.Y{year}
             numbers.Add(ParseInt(input, startIndex));
             return numbers.ToArray();
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ParseUInt(string number) {
             return (uint)ParseLong(number, 0, number.Length);

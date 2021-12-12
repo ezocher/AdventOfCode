@@ -25,7 +25,7 @@ namespace AdventOfCode
 
             // Developing and running solution:
             Runner.AdventYear(Year, Day);
-            // TODO: If Solved is true and input file name doesn't include solutions, then rename input file with solutions
+            // TODO: If Solved is true and input file name doesn't include solutions, then rename input file to add solutions
 
             // After Solving:
             if (Solved)
