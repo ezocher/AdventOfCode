@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 namespace AdventOfCode.Core {
     public static partial class Tools {
+
         private static string GetSolutionRootPath() {
             string runningExePath = AppDomain.CurrentDomain.BaseDirectory;
             return runningExePath.Substring(0, runningExePath.IndexOf(@"\bin\"));
@@ -92,12 +93,12 @@ namespace AdventOfCode.Core {
             string dayTitle = html.Substring(index3 + dayHeader.Length, index4 - index3 - dayHeader.Length);
 
             // Search backward from the first </article> to find the puzzle question inside an <em></em> block
-            // TODO: remove tags (if any) from the string inside the <em></em> block
+            // Remove the tags from inside the <em></em> block to get the raw text
             string startOfPuzzlePrompt = "<em>";
             string endOfPuzzlePrompt   = "</em>";
             int indexFPPStart = html.LastIndexOf(startOfPuzzlePrompt, index2) + startOfPuzzlePrompt.Length;
             int indexFPPEnd = html.IndexOf(endOfPuzzlePrompt, indexFPPStart);
-            string firstPuzzlePrompt = html.Substring(indexFPPStart, indexFPPEnd - indexFPPStart);
+            string firstPuzzlePrompt = RemoveAllTags(html.Substring(indexFPPStart, indexFPPEnd - indexFPPStart));
 
             string secondPart = index5 > 0 ? html.Substring(index5, index6 - index5 + 10) : string.Empty;
             string descriptionHtml =
@@ -217,6 +218,7 @@ namespace AdventOfCode.Y{year}
                 return sr.ReadToEnd();
             }
         }
+
         public static List<string> GetLines(string input) {
             List<string> lines = new List<string>();
             StringBuilder line = new StringBuilder();
@@ -232,6 +234,42 @@ namespace AdventOfCode.Y{year}
             lines.Add(line.ToString());
             return lines;
         }
+
+
+        // TODO: change this to an extension method of StringBuilder?
+        public static int IndexOf(StringBuilder s, char c, int start)
+        {
+            if (start >= s.Length)
+                return -1;
+
+            while (s[start] != c)
+            {
+                start++;
+                if (start == s.Length)
+                    return - 1;
+            }
+            return start;
+        }
+
+        public static string RemoveAllTags(string html)
+        {
+            StringBuilder output = new StringBuilder(html);
+
+            int searchIndex = 0;
+            int openTagIndex;
+
+            while ((openTagIndex = IndexOf(output, '<', searchIndex)) != -1)
+            {
+                int closeTagIndex = IndexOf(output, '>', openTagIndex + 1);
+                if (closeTagIndex == -1)
+                    break;
+                output.Remove(openTagIndex, closeTagIndex - openTagIndex + 1);
+                searchIndex = openTagIndex;
+            }
+
+            return output.ToString();
+        }
+
         public static List<string> GetSections(string input, char newLineReplacement = '\n') {
             List<string> sections = new List<string>();
             StringBuilder section = new StringBuilder();
