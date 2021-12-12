@@ -13,59 +13,125 @@ namespace AdventOfCode.Core {
             return runningExePath.Substring(0, runningExePath.IndexOf(@"\bin\"));
         }
 
-        // If no input, fetch puzzle input and generate empty test input file
-        // This does nothing if files have already been downloaded/generated
-        public static void DownloadInput(string session, int year, int day)
+        // If no input, fetch puzzle input and create empty test input file
+        // This does nothing and returns false if files have already been downloaded and/or generated
+        public static bool DownloadInput(string session, int year, int day)
         {
-            string path = GetSolutionRootPath();
+            // Input files stored in rootPath plus \Y20XX\Inputs
+            string solutionRootPath = GetSolutionRootPath();
+            string inputFilesPath = Path.Combine(solutionRootPath, $@"Y{year}\Inputs");
+
+            Directory.CreateDirectory(Path.Combine(solutionRootPath, $"Y{year}"));
+            Directory.CreateDirectory(inputFilesPath);
+
+            string[] existingInputFiles = Directory.GetFiles(inputFilesPath, $"puzzle{day:00}-*.txt");
+            if (existingInputFiles.Length > 0)
+            {
+                return false;
+            }
+            else
+            {
+                // fetch puzzle input
+                using (HttpClient web = GetAdventOfCodeClient(session))
+                {
+                    string html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}/input");
+                    File.WriteAllText(Path.Combine(inputFilesPath, $@"puzzle{day:00}--.txt"), html.TrimEnd());
+                }
+                Console.WriteLine($"Downloaded input for {year}-{day}");
+
+                // Create empty test input file
+                using (FileStream fs = File.Create(inputFilesPath + $@"\puzzle{day:00}---test.txt"))
+                    fs.Close();
+                Console.WriteLine($"Generated empty test input file 'puzzle{day:00}---test.txt'");
+
+                return true;
+            }
+        }
+
+        private static HttpClient GetAdventOfCodeClient(string session)
+        {
+            HttpClient web = new HttpClient(new HttpClientHandler() { AutomaticDecompression = System.Net.DecompressionMethods.All });
+            web.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("advent-of-code-grabber", "1.0"));
+            web.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
+            web.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            web.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            web.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html"));
+            web.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue() { NoCache = true };
+            web.DefaultRequestHeaders.Add("cookie", $"session={session}");
+
+            return web;
         }
 
         // Downloads or re-downloads puzzle description from aoc.com
-        public static string DownloadDescription(string session, int year, int day)
+        // Extracts Puzzle Title for insertion into code teplate
+        public static (string, string) DownloadDescription(string session, int year, int day)
         {
-            string path = GetSolutionRootPath();
+            string solutionRootPath = GetSolutionRootPath();
+            string html;
 
-            return String.Empty;
+            using (HttpClient web = GetAdventOfCodeClient(session))
+            {
+                html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}");
+            }
+
+            // Directory.CreateDirectory(Path.Combine(path, $"Y{year}")); // This is done by DownloadInput()
+
+            int index1 = html.IndexOf("<article", StringComparison.OrdinalIgnoreCase);
+            int index2 = html.IndexOf("</article>", StringComparison.OrdinalIgnoreCase);
+            int index5 = html.IndexOf("<article", index1 + 1, StringComparison.OrdinalIgnoreCase);
+            int index6 = html.IndexOf("</article>", index2 + 1, StringComparison.OrdinalIgnoreCase);
+            //if (index1 < 0 || index2 < 0)
+            //{
+            //    Console.WriteLine($"\nFailed to download Puzzle description {year}-{day}", ConsoleColor.Red);
+            //    return;
+            //}
+
+            string dayHeader = $"<h2>--- Day {day}: ";
+            int index3 = html.IndexOf(dayHeader);
+            int index4 = html.IndexOf(" ---</h2>", index3);
+            string dayTitle = html.Substring(index3 + dayHeader.Length, index4 - index3 - dayHeader.Length);
+
+            // Search backward from the first </article> to find the puzzle question inside an <em></em> block
+            // TODO: remove tags (if any) from the string inside the <em></em> block
+            string startOfPuzzlePrompt = "<em>";
+            string endOfPuzzlePrompt   = "</em>";
+            int indexFPPStart = html.LastIndexOf(startOfPuzzlePrompt, index2) + startOfPuzzlePrompt.Length;
+            int indexFPPEnd = html.IndexOf(endOfPuzzlePrompt, indexFPPStart);
+            string firstPuzzlePrompt = html.Substring(indexFPPStart, indexFPPEnd - indexFPPStart);
+
+            string secondPart = index5 > 0 ? html.Substring(index5, index6 - index5 + 10) : string.Empty;
+            string descriptionHtml =
+$@"<head>
+<link rel=""stylesheet"" type=""text/css"" href=""../../style.css""/>
+</head>
+{html.Substring(index1, index2 - index1 + 10)}
+{secondPart}".TrimEnd();
+
+            Directory.CreateDirectory(Path.Combine(solutionRootPath, $@"Y{year}\Descriptions"));
+            string descriptionPath = Path.Combine(solutionRootPath, $@"Y{year}\Descriptions\puzzle{day:00}.html");
+            File.WriteAllText(descriptionPath, descriptionHtml);
+
+            Console.WriteLine($"Downloaded description for {year}-{day}");
+
+            return (dayTitle, firstPuzzlePrompt);
         }
 
         // Download puzzle description and generate Puzzle class file
         // This does nothing if file has already been generated
-        public static void GeneratePuzzleTemplate(string session, int year, int day) {
-            Console.WriteLine($"Generating Template for {year}-{day}");
+        public static void GetInputGeneratePuzzleTemplate(string session, int year, int day) {
 
-            string path = GetSolutionRootPath();
+            if (!DownloadInput(session, year, day))
+                return;
 
-            using (HttpClient web = new HttpClient(new HttpClientHandler() { AutomaticDecompression = System.Net.DecompressionMethods.All })) {
-                web.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("advent-of-code-grabber", "1.0"));
-                web.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
-                web.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-                web.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                web.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html"));
-                web.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue() { NoCache = true };
-                web.DefaultRequestHeaders.Add("cookie", $"session={session}");
+            (string dayTitle, string firstPuzzlePrompt) = DownloadDescription(session, year, day);
 
-                string html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}");
-                int index1 = html.IndexOf("<article", StringComparison.OrdinalIgnoreCase);
-                int index2 = html.IndexOf("</article>", StringComparison.OrdinalIgnoreCase);
-                int index5 = html.IndexOf("<article", index1 + 1, StringComparison.OrdinalIgnoreCase);
-                int index6 = html.IndexOf("</article>", index2 + 1, StringComparison.OrdinalIgnoreCase);
-                if (index1 < 0 || index2 < 0) {
-                    Console.WriteLine($"Failed to download Puzzle data {year}-{day}", ConsoleColor.Red);
-                    return;
-                }
+            string solutionRootPath = GetSolutionRootPath();
 
-                string dayHeader = $"<h2>--- Day {day}: ";
-                int index3 = html.IndexOf(dayHeader);
-                int index4 = html.IndexOf(" ---</h2>", index3);
-                string dayTitle = html.Substring(index3 + dayHeader.Length, index4 - index3 - dayHeader.Length);
+            // string html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}");
 
-                Directory.CreateDirectory(Path.Combine(path, $"Y{year}"));
-                Directory.CreateDirectory(Path.Combine(path, $"Y{year}\\Inputs"));
-                Directory.CreateDirectory(Path.Combine(path, $"Y{year}\\Descriptions"));
-
-                string classPath = Path.Combine(path, $"Y{year}\\Puzzle{day:00}.cs");
-                if (!File.Exists(classPath)) {
-                    string templateClass =
+            string classPath = Path.Combine(solutionRootPath, $"Y{year}\\Puzzle{day:00}.cs");
+            if (!File.Exists(classPath)) {
+                string templateClass =
 @$"using AdventOfCode.Common;
 using AdventOfCode.Core;
 using System;
@@ -108,7 +174,7 @@ namespace AdventOfCode.Y{year}
                 intLines.Add(new IntLine(inputLine)); 
         }}
 
-        [Description(""What is the answer?"")]
+        [Description(""{firstPuzzlePrompt}"")]
         public override string SolvePart1()
         {{
             foreach (int number in numbers)
@@ -125,35 +191,25 @@ namespace AdventOfCode.Y{year}
         }}
     }}
 }}";
-                    File.WriteAllText(classPath, templateClass);
-                }
+                File.WriteAllText(classPath, templateClass);
 
-                string secondPart = index5 > 0 ? html.Substring(index5, index6 - index5 + 10) : string.Empty;
-                string descriptionHtml =
-$@"<head>
-<link rel=""stylesheet"" type=""text/css"" href=""../../style.css""/>
-</head>
-{html.Substring(index1, index2 - index1 + 10)}
-{secondPart}".TrimEnd();
-
-                string descriptionPath = Path.Combine(path, $@"Y{year}\Descriptions\puzzle{day:00}.html");
-                File.WriteAllText(descriptionPath, descriptionHtml);
-
-                string[] files = Directory.GetFiles(@$"Y{year}\Inputs\", $"puzzle{day:00}*.txt", SearchOption.TopDirectoryOnly);
-                if (files.Length == 0) {
-                    html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}/input");
-                    File.WriteAllText(Path.Combine(path, $@"Y{year}\Inputs\puzzle{day:00}--.txt"), html.TrimEnd());
-                }
+                Console.WriteLine($"Generated class template for {year}-{day}\n");
             }
         }
+
+        // TODO: Bubble up exceptions to callers who can handle them and have appropriate messages
         private static string DownloadHtml(HttpClient web, string url) {
+            Task<string> contentTask;
+
             Task<HttpResponseMessage> responseTask = web.GetAsync(url);
             responseTask.Wait();
             HttpResponseMessage response = responseTask.Result.EnsureSuccessStatusCode();
-            Task<string> contentTask = response.Content.ReadAsStringAsync();
+            contentTask = response.Content.ReadAsStringAsync();
             contentTask.Wait();
+
             return contentTask.Result.ToString();
         }
+
         public static string GetInput(string filePath) {
             if (!File.Exists(filePath)) { return string.Empty; }
 
