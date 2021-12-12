@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using AdventOfCode.Core;
 
-namespace AdventOfCode {
-    public partial class Program {
-        public static void Main(string[] args) {
+namespace AdventOfCode
+{
+    public partial class Program
+    {
+        public static void Main(string[] args)
+        {
             // Run all solutions or run solutions for a specific year
             // Runner.AdventYear(2021); return;
 
