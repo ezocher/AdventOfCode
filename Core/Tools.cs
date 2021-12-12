@@ -188,6 +188,8 @@ namespace AdventOfCode.Y{year}
         [Description(""What is the answer?"")]
         public override string SolvePart2()
         {{
+            Setup();    // Remove if Part 2 builds on output of Part 1
+
             return string.Empty;
         }}
     }}
