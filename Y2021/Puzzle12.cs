@@ -22,11 +22,11 @@ namespace AdventOfCode.Y2021
 
             public void AddLink(Cave c) => Links.Add(c);
 
-            public bool IsLarge() => (Char.IsUpper(Name[0]));
+            public bool IsSmall() => (Char.IsLower(Name[0]));
 
             public override string ToString()
             {
-                return $"{Name} ({Links.Count} ->)";
+                return $"{Name} ({Links.Count}->)";
             }
 
         }
@@ -46,7 +46,7 @@ namespace AdventOfCode.Y2021
         private Dictionary<string, Cave> caveSystem;
         List<List<Cave>> paths;
 
-        private void EnumerateAllPaths(List<Cave> path, bool hasDupSmall, Cave cave)
+        private void EnumerateAllPaths(List<Cave> path, bool smallDupVisited, Cave cave)
         {
             List<Cave>[] pathForks;
 
@@ -56,69 +56,7 @@ namespace AdventOfCode.Y2021
                 paths.Add(path);
                 return;
             }
-            else if (!cave.IsLarge() && path.Contains(cave))
-            {
-                return;
-            }
-            else
-            {
-                path.Add(cave);
-                pathForks = new List<Cave>[cave.Links.Count];
-                pathForks[0] = path;
-                for (int i = 1; i < cave.Links.Count; i++)
-                    pathForks[i] = new List<Cave>(path);
-                for (int i = 0; i < cave.Links.Count; i++)
-                    EnumerateAllPaths(pathForks[i], cave.Links[i]);
-            }
-        }
-
-        private void EnumerateAllPaths(List<Cave> path, Cave cave)
-        {
-            List<Cave>[] pathForks;
-
-            if (cave.Name == "end")
-            {
-                path.Add(cave);
-                paths.Add(path);
-                return;
-            }
-            else if (!cave.IsLarge() && path.Contains(cave))
-            {
-                return;
-            }
-            else
-            {
-                path.Add(cave);
-                pathForks = new List<Cave>[cave.Links.Count];
-                pathForks[0] = path;
-                for (int i = 1; i < cave.Links.Count; i++)
-                    pathForks[i] = new List<Cave>(path);
-                for (int i = 0; i < cave.Links.Count; i++)
-                    EnumerateAllPaths(pathForks[i], cave.Links[i]);
-            }
-        }
-
-        private string Concat(List<Cave> path)
-        {
-            StringBuilder s = new StringBuilder();
-
-            foreach (Cave c in path)
-                s.Append((c.Name == "end") ? c.Name : $"{c.Name}, ");
-
-            return s.ToString();
-        }
-
-        private void EnumerateAllPathsPart2(List<Cave> path, bool hasSmallDup, Cave cave)
-        {
-            List<Cave>[] pathForks;
-
-            if (cave.Name == "end")
-            {
-                path.Add(cave);
-                paths.Add(path);
-                return;
-            }
-            else if (!cave.IsLarge() && path.Contains(cave) && hasSmallDup)
+            else if (cave.IsSmall() && path.Contains(cave) && smallDupVisited)
             {
                 return;
             }
@@ -126,15 +64,15 @@ namespace AdventOfCode.Y2021
             {
                 if ((cave.Name == "start") && path.Count > 0)
                     return;
-                if (!cave.IsLarge() && path.Contains(cave))
-                    hasSmallDup = true;
+                if (cave.IsSmall() && path.Contains(cave))
+                    smallDupVisited = true;
                 path.Add(cave);
                 pathForks = new List<Cave>[cave.Links.Count];
                 pathForks[0] = path;
                 for (int i = 1; i < cave.Links.Count; i++)
                     pathForks[i] = new List<Cave>(path);
                 for (int i = 0; i < cave.Links.Count; i++)
-                    EnumerateAllPathsPart2(pathForks[i], hasSmallDup, cave.Links[i]);
+                    EnumerateAllPaths(pathForks[i], smallDupVisited, cave.Links[i]);
             }
         }
 
@@ -161,12 +99,10 @@ namespace AdventOfCode.Y2021
         public override string SolvePart1()
         {
             List<Cave> path = new List<Cave>();
-            EnumerateAllPaths(path, caveSystem["start"]);
+            EnumerateAllPaths(path, true, caveSystem["start"]);
             
             return paths.Count.ToString();
         }
-
-
 
         [Description("Given these new rules, how many paths through this cave system are there?")]
         public override string SolvePart2()
@@ -174,7 +110,7 @@ namespace AdventOfCode.Y2021
             paths = new List<List<Cave>>();
 
             List<Cave> path = new List<Cave>();
-            EnumerateAllPathsPart2(path, false, caveSystem["start"]);
+            EnumerateAllPaths(path, false, caveSystem["start"]);
 
             return paths.Count.ToString();
         }
