@@ -8,37 +8,7 @@ namespace AdventOfCode.Y2021
 {
     public class Puzzle13 : ASolver 
     {
-        public class Dot
-        {
-            public int X, Y;
-
-            public Dot(int x, int y)
-            {
-                this.X = x; this.Y = y;
-            }
-
-            public Dot(string s)
-            {
-                string[] coordinates = s.Split(",", StringSplitOptions.RemoveEmptyEntries);
-                X = Int32.Parse(coordinates[0]);
-                Y = Int32.Parse(coordinates[1]);
-            }
-
-            public override string ToString() => ($"{X},{Y}");
-        }
-
-        private (int, int) MaxXY(List<Dot> dots)
-        {
-            int maxX = 0; int maxY = 0;
-            foreach (Dot dot in dots)
-            {
-                if (dot.X > maxX) maxX = dot.X;
-                if (dot.Y > maxY) maxY = dot.Y;
-            }
-            return (maxX, maxY);
-        }
-
-        private List<Dot> dots;
+        private List<IntPoint> dots;
 
         private bool[,] paper;
 
@@ -46,9 +16,9 @@ namespace AdventOfCode.Y2021
 
         private List<(bool, int)> folds;
 
-        private void MarkDots(List<Dot> dots)
+        private void MarkDots(List<IntPoint> dots)
         {
-            foreach (Dot dot in dots)
+            foreach (IntPoint dot in dots)
                 paper[dot.X, dot.Y] = true;
         }
 
@@ -94,31 +64,17 @@ namespace AdventOfCode.Y2021
             return folded;
         }
 
-        private int CountDots(bool[,] boolarray)
-        {
-            int count = 0;
-            int columns = boolarray.GetLength(0);
-            int rows = boolarray.GetLength(1);
-
-            for (int i = 0; i < columns; i++)
-                for (int j = 0; j < rows; j++)
-                    if (boolarray[i, j])
-                        count++;
-
-            return count;
-        }
-
         public Puzzle13(string input) : base(input) { Name = "Transparent Origami"; }
 
         public override void Setup()
         {
             List<string> lines = Tools.GetLines(Input);
 
-            dots = new List<Dot>();
+            dots = new List<IntPoint>();
 
             int i = 0;
             while (lines[i].Length > 0)
-                dots.Add(new Dot(lines[i++]));
+                dots.Add(new IntPoint(lines[i++]));
 
             folds = new List<(bool, int)>();
 
@@ -131,7 +87,7 @@ namespace AdventOfCode.Y2021
                 folds.Add((foldUp, foldLocation));
             }
 
-            (columns, rows) = MaxXY(dots);
+            (columns, rows) = IntPoint.MaxXY(dots);
             columns++; rows++;  //Add one for 0,0 row and column
 
             paper = new bool[columns, rows];
@@ -143,7 +99,7 @@ namespace AdventOfCode.Y2021
         public override string SolvePart1()
         {
             bool[,] folded1 = FoldPaper(paper, folds[0]);
-            int dotCount = CountDots(folded1);
+            int dotCount = Tools.CountTrue(folded1);
             return dotCount.ToString();
         }
 
@@ -157,7 +113,8 @@ namespace AdventOfCode.Y2021
                 folded = FoldPaper(folded, fold);
 
             // This solution writes the "image" of the folded paper to the console, but doesn't
-            //  convert it into a string, the strings below were added after visually solving the puzzle
+            //  convert it into a string, the strings below were added after visually inspecting the output
+            // If the puzzle included character bitmaps it would be interesting to do the "OCR" step
             CharImage paperImage = new CharImage(folded, '#', ' ');
             paperImage.WriteTransposed();
 

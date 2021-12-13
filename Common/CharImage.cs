@@ -78,9 +78,8 @@ namespace AdventOfCode.Common
             for (int row = 0; row < Height; row++)
             {
                 for (int column = 0; column < Width; column++)
-                {
                     Console.Write(Data[row, column]);
-                }
+
                 Console.WriteLine();
             }
             Console.WriteLine();
@@ -92,9 +91,8 @@ namespace AdventOfCode.Common
             for (int i = 0; i < Height; i++)
             {
                 for (int j = 0; j < Width; j++)
-                {
                     Console.Write(Data[j, i]);
-                }
+
                 Console.WriteLine();
             }
             Console.WriteLine();

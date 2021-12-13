@@ -23,6 +23,17 @@ namespace AdventOfCode.Common
         }
 
         public override string ToString() => ($"{X},{Y}");
+
+        public static (int, int) MaxXY(List<IntPoint> points)
+        {
+            int maxX = 0; int maxY = 0;
+            foreach (IntPoint pt in points)
+            {
+                if (pt.X > maxX) maxX = pt.X;
+                if (pt.Y > maxY) maxY = pt.Y;
+            }
+            return (maxX, maxY);
+        }
     }
 
     public class IntLine

@@ -89,5 +89,20 @@ namespace AdventOfCode.Core
             else if (a == b)   return  0;
             else /* (a > b) */ return  1;
         }
+
+        public static int CountTrue(bool[,] boolarray)
+        {
+            int count = 0;
+
+            int columns = boolarray.GetLength(0);
+            int rows = boolarray.GetLength(1);
+
+            for (int i = 0; i < columns; i++)
+                for (int j = 0; j < rows; j++)
+                    if (boolarray[i, j])
+                        count++;
+
+            return count;
+        }
     }
 }
