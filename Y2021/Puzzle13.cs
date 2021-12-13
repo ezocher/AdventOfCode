@@ -1,4 +1,4 @@
-using AdventOfCode.Common;
+﻿using AdventOfCode.Common;
 using AdventOfCode.Core;
 using System;
 using System.Collections.Generic;
@@ -162,7 +162,7 @@ namespace AdventOfCode.Y2021
             paperImage.WriteTransposed();
 
             if (paperImage.Width <= 5)
-                return "O";             // test input
+                return "□";             // test input
             else
                 return "HZLEHJRK";      // Given input
         }
