@@ -31,6 +31,11 @@ namespace AdventOfCode.Common
                         Data[row, column] = value;
         }
 
+        //public CharImage(bool[,] values, char tchar = '*', char fchar = ' ')
+        //{
+        //    this.Width = values.
+        //}
+
         public void MapChar(char fromChar, char toChar)
         {
             for (int row = 0; row < Height; row++)
