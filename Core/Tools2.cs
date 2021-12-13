@@ -9,6 +9,20 @@ namespace AdventOfCode.Core
     // TODO: Review and organize AdventOfCode.Core.Tools
     public static partial class Tools
     {
+        public static int IndexOf(this StringBuilder s, char c, int start)
+        {
+            if (start >= s.Length)
+                return -1;
+
+            while (s[start] != c)
+            {
+                start++;
+                if (start == s.Length)
+                    return -1;
+            }
+            return start;
+        }
+
         public static (T, T) MinMax<T>(IEnumerable<T> values) where T : IComparable<T>
         {
             bool firstElement = true;

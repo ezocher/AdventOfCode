@@ -12,7 +12,7 @@ namespace AdventOfCode
             // Runner.AdventYear(2021); return;
 
             const int Year = 2021;
-            const int Day = 12;
+            const int Day = 11;
             const bool Solved = true;
 
             // Before puzzle release:
@@ -21,7 +21,7 @@ namespace AdventOfCode
             // At puzzle release:
             //   Get input and description and generate puzzle class file and empty test input file
             //   (this returns quickly if files have already been downloaded/generated)
-            Tools.GetInputGeneratePuzzleTemplate(SESSION, Year, Day);
+            Infrastructure.GetInputGeneratePuzzleTemplate(SESSION, Year, Day);
 
             // Developing and running solution:
             Runner.AdventYear(Year, Day);
@@ -30,7 +30,7 @@ namespace AdventOfCode
             // After Solving:
             if (Solved)
             {
-                Tools.DownloadDescription(SESSION, Year, Day);   // Get description including part 2
+                Infrastructure.DownloadDescription(SESSION, Year, Day);   // Get description including part 2
                 Runner.WriteLine("\nReminder: add final solutions to names of input files\n", ConsoleColor.Red);
                 Runner.WriteLine("Reminder: update README.md", ConsoleColor.Red);
             }
