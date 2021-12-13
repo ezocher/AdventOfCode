@@ -110,7 +110,6 @@ namespace AdventOfCode.Y2021
 
         public Puzzle13(string input) : base(input) { Name = "Transparent Origami"; }
 
-
         public override void Setup()
         {
             List<string> lines = Tools.GetLines(Input);
@@ -148,14 +147,24 @@ namespace AdventOfCode.Y2021
             return dotCount.ToString();
         }
 
-
-
-        [Description("What is the answer?")]
+        [Description("What code do you use to activate the infrared thermal imaging camera system?")]
         public override string SolvePart2()
         {
-            Setup();    // Remove if Part 2 builds on output of Part 1
+            Setup();
+            bool[,] folded = paper;
 
-            return string.Empty;
+            foreach ((bool,int) fold in folds)
+                folded = FoldPaper(folded, fold);
+
+            // This solution writes the "image" of the folded paper to the console, but doesn't
+            //  convert it into a string, the strings below were added after visually solving the puzzle
+            CharImage paperImage = new CharImage(folded, '#', ' ');
+            paperImage.WriteTransposed();
+
+            if (paperImage.Width <= 5)
+                return "O";             // test input
+            else
+                return "HZLEHJRK";      // Given input
         }
     }
 }

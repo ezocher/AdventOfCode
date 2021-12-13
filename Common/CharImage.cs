@@ -31,10 +31,20 @@ namespace AdventOfCode.Common
                         Data[row, column] = value;
         }
 
-        //public CharImage(bool[,] values, char tchar = '*', char fchar = ' ')
-        //{
-        //    this.Width = values.
-        //}
+        public CharImage(bool[,] values, char tchar = '#', char fchar = '.')
+        {
+            this.Width = values.GetLength(0);
+            this.Height = values.GetLength(1);
+            Data = new char[Width, Height];
+
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    if (values[i, j])
+                        Data[i, j] = tchar;
+                    else
+                        Data[i, j] = fchar;
+        }
+
 
         public void MapChar(char fromChar, char toChar)
         {
@@ -64,11 +74,26 @@ namespace AdventOfCode.Common
 
         public void Write()
         {
+            Console.WriteLine();
             for (int row = 0; row < Height; row++)
             {
                 for (int column = 0; column < Width; column++)
                 {
                     Console.Write(Data[row, column]);
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+        }
+
+        public void WriteTransposed()
+        {
+            Console.WriteLine();
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    Console.Write(Data[j, i]);
                 }
                 Console.WriteLine();
             }
