@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Common
 {
+    // TODO: Bugs from height and width confusion
+    // TODO: WriteTransposed() is broken for non-square regular CharImage's
+    // TODO: constructor from boolean array is broken, works with broken WriteTransposed() but not with Write()
     class CharImage
     {
         public char[,] Data;
