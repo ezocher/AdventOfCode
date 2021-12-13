@@ -11,9 +11,9 @@ namespace AdventOfCode.Y2021
         private int[,] energyLevels;
 
         private const int GridSize = 10;
-        private const int Steps = 100;
-        private const int MaxEnergy = 9;
+
         private const int StartEnergy = 0;
+        private const int MaxEnergy = 9;
         private const int HasFlashed = -1;
 
         public Puzzle11(string input) : base(input) { Name = "Dumbo Octopus"; }
@@ -80,6 +80,8 @@ namespace AdventOfCode.Y2021
         [Description("How many total flashes are there after 100 steps?")]
         public override string SolvePart1()
         {
+            const int Steps = 100;
+
             int totalFlashes = 0;
 
             for (int step = 1; step <= Steps; step++)
