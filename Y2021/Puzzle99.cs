@@ -20,14 +20,16 @@ namespace AdventOfCode.Y2021
             img2 = new CharImage(lines, 10, 20, 5);
         }
 
-        [Description("What???")]
+        [Description("CharImage tests")]
         public override string SolvePart1()
         {
             img.Write();
             img2.Write();
+            img2.WriteTransposed();
 
             img.MapChar('.', ' ');
             img.Write();
+            img.WriteTransposed();
 
             img3 = new CharImage(80, 10, 'o');
             img3.Write();
@@ -41,7 +43,7 @@ namespace AdventOfCode.Y2021
             return String.Empty;
         }
 
-        [Description("What else???")]
+        [Description("TBD")]
         public override string SolvePart2()
         {
             return String.Empty;
