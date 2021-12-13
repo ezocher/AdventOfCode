@@ -24,15 +24,13 @@ namespace AdventOfCode
             Infrastructure.GetInputGeneratePuzzleTemplate(SESSION, Year, Day);
 
             // Developing and running solution:
-            Runner.AdventYear(Year, Day);
-            // TODO: If Solved is true and input file name doesn't include solutions, then rename input file to add solutions
+            Runner.AdventYear(Year, Day, Solved);
 
             // After Solving:
             if (Solved)
             {
                 Infrastructure.DownloadDescription(SESSION, Year, Day);   // Get description including part 2
-                Runner.WriteLine("\nReminder: add final solutions to names of input files\n", ConsoleColor.Red);
-                Runner.WriteLine("Reminder: update README.md", ConsoleColor.Red);
+                Runner.WriteLine("\nReminder: update README.md", ConsoleColor.Red);
             }
         }
     }

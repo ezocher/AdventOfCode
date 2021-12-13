@@ -6,7 +6,7 @@ using System.IO;
 using System.Reflection;
 namespace AdventOfCode.Core {
     public static class Runner {
-        public static void AdventYear(int year = 0, int dayToRun = 0) {
+        public static void AdventYear(int year = 0, int dayToRun = 0, bool solved = false) {
             Type[] types = typeof(Tools).Assembly.GetTypes();
             List<Type> puzzles = new List<Type>();
 
@@ -86,14 +86,18 @@ namespace AdventOfCode.Core {
                         sw.Stop();
 
                         totalTime += sw.ElapsedTicks / 1000;
-                        totalTime += AdventDay(day, solver, sw.ElapsedTicks / 1000, inputName, answer1, answer2);
+                        totalTime += AdventDay(day, solver, sw.ElapsedTicks / 1000, inputName, answer1, answer2, solved, filePath);
                     }
                 }
             }
             Write($"--- Total Time:");
             WriteTime(totalTime);
         }
-        private static long AdventDay(int day, ASolver puzzle, long constructorMS, string inputName, string answer1, string answer2) {
+        private static long AdventDay(int day, ASolver puzzle, long constructorMS, string inputName, string answer1, string answer2, bool solved, string inputFilePath)
+        {
+            string answerPart1 = null;
+            string answerPart2 = null;
+
             Write($"Day {day}", ConsoleColor.Yellow);
             if (!string.IsNullOrEmpty(puzzle.Name)) { Write($": {puzzle.Name}"); }
             Write($"  ({inputName})", ConsoleColor.Yellow);
@@ -118,6 +122,7 @@ namespace AdventOfCode.Core {
                 if (!string.IsNullOrEmpty(answer)) {
                     WindowsClipboard.SetText(answer);
                     WriteLine($"    '{answer}' copied to clipboard\n", ConsoleColor.White);
+                    answerPart1 = answer;
                 }
             }
 
@@ -138,6 +143,20 @@ namespace AdventOfCode.Core {
                 if (!string.IsNullOrEmpty(answer)) {
                     WindowsClipboard.SetText(answer);
                     WriteLine($"    '{answer}' copied to clipboard\n", ConsoleColor.White);
+                    answerPart2 = answer;
+                }
+            }
+            
+            if ((solved) && (!string.IsNullOrEmpty(answerPart1)) && (!string.IsNullOrEmpty(answerPart2)))
+            {
+                string inputFileName = Path.GetFileName(inputFilePath);
+                if (inputFileName.Substring(0, $"puzzle{day:00}--".Length) == $"puzzle{day:00}--")
+                {
+                    string oldName = Path.Combine(Infrastructure.GetSolutionRootPath(), inputFilePath);
+                    string newFileName = $"puzzle{day:00}-{answerPart1}-{answerPart2}" + ((inputName != "Given") ? $"-{inputName}.txt" : ".txt");
+                    string newName = Path.Combine(Path.GetDirectoryName(oldName), newFileName);
+                    File.Move(oldName, newName);
+                    Console.WriteLine($"Renaming '{inputFileName}' -> '{newFileName}'");
                 }
             }
 

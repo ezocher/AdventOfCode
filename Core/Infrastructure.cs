@@ -11,7 +11,7 @@ namespace AdventOfCode.Core
 {
     static class Infrastructure
     {
-        private static string GetSolutionRootPath()
+        public static string GetSolutionRootPath()
         {
             string runningExePath = AppDomain.CurrentDomain.BaseDirectory;
             return runningExePath.Substring(0, runningExePath.IndexOf(@"\bin\"));
