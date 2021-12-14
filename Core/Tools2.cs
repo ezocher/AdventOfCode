@@ -104,5 +104,21 @@ namespace AdventOfCode.Core
 
             return count;
         }
+
+        public static void InsertOrIncrement<T>(this Dictionary<T, int> dict, T key, int increment)
+        {
+            if (dict.ContainsKey(key))
+                dict[key] += increment;
+            else
+                dict.Add(key, increment);
+        }
+
+        public static void InsertOrIncrement<T>(this Dictionary<T, long> dict, T key, long increment)
+        {
+            if (dict.ContainsKey(key))
+                dict[key] += increment;
+            else
+                dict.Add(key, increment);
+        }
     }
 }
