@@ -123,7 +123,6 @@ $@"<head>
         // This does nothing if file has already been generated
         public static void GetInputGeneratePuzzleTemplate(string session, int year, int day)
         {
-
             if (!DownloadInput(session, year, day))
                 return;
 
@@ -191,7 +190,7 @@ namespace AdventOfCode.Y{year}
             return string.Empty;
         }}
 
-        [Description(""What is the answer?"")]
+        [Description(""{firstPuzzlePrompt}"")]
         public override string SolvePart2()
         {{
             Setup();    // Remove if Part 2 builds on output of Part 1
@@ -206,7 +205,7 @@ namespace AdventOfCode.Y{year}
             }
         }
 
-        // TODO: Bubble up exceptions to callers who can handle them and have appropriate messages
+        // TODO: Bubble up exceptions (such as 404's) to callers who can handle them and have appropriate messages
         private static string DownloadHtml(HttpClient web, string url)
         {
             Task<string> contentTask;
@@ -238,6 +237,5 @@ namespace AdventOfCode.Y{year}
 
             return output.ToString();
         }
-
     }
 }
