@@ -59,7 +59,7 @@ namespace AdventOfCode.Common
 
         public void Randomize(char lowChar, char highChar)
         {
-            Random rand = new Random();
+            Random rand = new();
 
             for (int row = 0; row < Height; row++)
                 for (int column = 0; column < Width; column++)
