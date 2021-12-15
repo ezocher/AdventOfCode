@@ -22,7 +22,7 @@ namespace AdventOfCode.Y2021
                 paper[dot.X, dot.Y] = true;
         }
 
-        private bool[,] FoldPaper(bool[,] paper, (bool, int) foldSpec)
+        private static bool[,] FoldPaper(bool[,] paper, (bool, int) foldSpec)
         {
             int columns = paper.GetLength(0);
             int rows = paper.GetLength(1);
@@ -82,8 +82,8 @@ namespace AdventOfCode.Y2021
             for (int j = i; j < lines.Count; j++)
             {
                 string[] parts = lines[j].Split("=");
-                bool foldUp = (parts[0][parts[0].Length - 1] == 'y');
-                int foldLocation = Int32.Parse(parts[1]);
+                bool foldUp = (parts[0][^1] == 'y');
+                int foldLocation = int.Parse(parts[1]);
                 folds.Add((foldUp, foldLocation));
             }
 
@@ -115,7 +115,7 @@ namespace AdventOfCode.Y2021
             // This solution writes the "image" of the folded paper to the console, but doesn't
             //  convert it into a string, the strings below were added after visually inspecting the output
             // If the puzzle included character bitmaps it would be interesting to do the "OCR" step
-            CharImage paperImage = new CharImage(folded, '#', ' ');
+            CharImage paperImage = new(folded, '#', ' ');
             paperImage.WriteTransposed();
 
             if (paperImage.Width <= 5)
