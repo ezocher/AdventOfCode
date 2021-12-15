@@ -12,11 +12,9 @@ namespace AdventOfCode.Y2021
         // Used StringBuilder for Part 1 and character pairs in a dictionary for Part 2
         private StringBuilder polymerSB;
         private Dictionary<string, long> polymerByPairs;
+        private Dictionary<char, long> charFrequencyPBP;    // Count characters as they are inserted
 
         private Dictionary<string, char> pairInsertionRules;
-
-        // Need to deduct count of characters as they are duplicated in the pairs into dictionary process
-        private Dictionary<char, long> charFrequencyPBP;
 
         public Puzzle14(string input) : base(input) { Name = "Extended Polymerization"; }
 
@@ -73,17 +71,14 @@ namespace AdventOfCode.Y2021
             {
                 string pair = starting.Substring(i, 2);
                 polymerBP.InsertOrIncrement(pair, 1);
-
-                if (i != starting.Length - 2)
-                    DuplicatedCharPBP(charFrequencyPBP, pair[1], 1);
             }
+
+            // Count characters in starting string
+            foreach (char c in starting)
+                charFrequencyPBP.InsertOrIncrement(c, 1);
 
             return polymerBP;
         }
-
-        // (Pre-)deduct characters from the final count as they are duplicated
-        public void DuplicatedCharPBP(Dictionary<char, long> dict, char c, long count) =>
-            Tools.InsertOrIncrement(dict, c, -count);
 
         private void PerformInsertionsPBP()
         {
@@ -93,7 +88,8 @@ namespace AdventOfCode.Y2021
             {
                 long count = pbp.Value;
                 char insertChar = pairInsertionRules[pbp.Key];
-                DuplicatedCharPBP(charFrequencyPBP, insertChar, count);
+
+                charFrequencyPBP.InsertOrIncrement(insertChar, count);  // Count characters as they're inserted
 
                 string newKey1 = pbp.Key[0].ToString() + insertChar.ToString();
                 newPBP.InsertOrIncrement(newKey1, count);
@@ -105,17 +101,11 @@ namespace AdventOfCode.Y2021
             polymerByPairs = newPBP;
         }
 
-        private (long mostCommon, long leastCommon) CountElementFrequencyPBP()
+        private (long mostCommon, long leastCommon) FindMostLeastPBP()
         {
-            foreach (KeyValuePair<string, long> pbp in polymerByPairs)
-            {
-                long count = pbp.Value;
-                charFrequencyPBP.InsertOrIncrement(pbp.Key[0], count);
-                charFrequencyPBP.InsertOrIncrement(pbp.Key[1], count);
-            }
-
             long most = 0;
             long least = Int64.MaxValue;
+
             foreach (KeyValuePair<char, long> cf in charFrequencyPBP)
             {
                 if (cf.Value > most) most = cf.Value;
@@ -142,7 +132,7 @@ namespace AdventOfCode.Y2021
             for (int step = 1; step <= 40; step++)
                 PerformInsertionsPBP();
 
-            (long mostCommon, long leastCommon) = CountElementFrequencyPBP();
+            (long mostCommon, long leastCommon) = FindMostLeastPBP();
 
             return (mostCommon - leastCommon).ToString();
         }
