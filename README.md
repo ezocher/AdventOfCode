@@ -21,3 +21,14 @@ https://adventofcode.com/
 | Worst Solution | 2021 Puzzle 8 | Prematurely overgeneralized and overcomplicated |
 | Best Finish | 2021 Puzzle 11 Part 1 | 2795th |
 | Worst Finish | 2021 Puzzle 8 Part 2 | 15607th |
+
+### Data Structures/Algorithms Used
+| Puzzle | DS/Classes|Algorithms | Notes |
+|-|-|-|-|
+|10|Espression stack|Expression parsing w/ errors||
+|11|2D Int Array|Game of Life-ish||
+|12|Graph|Path enumeration||
+|13|2D Boolean Array, CharImage|Folding||
+|14|Dictionary<string/char, numeric>, StringBuilder|Matching, counting|
+
+
