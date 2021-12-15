@@ -86,7 +86,7 @@ namespace AdventOfCode.Y2021
             return overlapCount;
         }
 
-        private int MaxCoordinate(List<IntLine> lines)
+        private static int MaxCoordinate(List<IntLine> lines)
         {
             int max = 0;
 
