@@ -93,6 +93,14 @@ namespace AdventOfCode.Y2021
 
             return riskmap[width - 1, height - 1];
         }
+        // TODO: Fix for above from u/TcMaX on Reddit:
+        // Ended up first iterating through the array in the pattern of[0][1], [1] [0], [1] [1] etc, and just filling out
+        // the minimum cumulative cost of the one to the left and the one above plus the cost of the current cell.This gives
+        // an array of the cumulative costs if you never go left or up. Obviously this was not sufficient, so I added an
+        // extra step where I iterated through every cell in the cumulative cost matrix, and then took the lowest value of
+        // each of the surrounding cells, added the cost of the current cell, and checked if that was less than the cumulative
+        // cost already found for that cell. Repeated with a while loop until no changes were made in an entire pass over the
+        // array. Not exactly elegant, but it did the job and wasn't too slow (took about 350ms on my machine (M1 Air) on part 2).
 
         private void RiskNextDownRight(int r, int x, int y) => riskmap[x, y] = Math.Min(riskmap[x, y], r + risks[x, y]);
 
