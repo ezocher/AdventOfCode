@@ -47,7 +47,7 @@ namespace AdventOfCode.Y2021
 
         private (int mostCommon, int leastCommon) CountElementFrequencySB()
         {
-            Dictionary<char, int> charFrequency = new Dictionary<char, int>();
+            Dictionary<char, int> charFrequency = new();
 
             for (int i = 0; i < polymerSB.Length; i++)
                 charFrequency.InsertOrIncrement(polymerSB[i], 1);
@@ -65,7 +65,7 @@ namespace AdventOfCode.Y2021
 
         private Dictionary<string, long> InitializePBP(string starting)
         {
-            Dictionary<string, long> polymerBP = new Dictionary<string, long>();
+            Dictionary<string, long> polymerBP = new();
 
             for (int i = 0; i < starting.Length - 1; i++)
             {
@@ -82,7 +82,7 @@ namespace AdventOfCode.Y2021
 
         private void PerformInsertionsPBP()
         {
-            Dictionary<string, long> newPBP = new Dictionary<string, long>(polymerByPairs.Count * 2);
+            Dictionary<string, long> newPBP = new(polymerByPairs.Count * 2);
 
             foreach (KeyValuePair<string, long> pbp in polymerByPairs)
             {
