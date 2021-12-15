@@ -17,6 +17,7 @@ namespace AdventOfCode.Y2021
 
         public Puzzle15(string input) : base(input) { Name = "Chiton"; }
 
+        // TODO: width and height are messed up for non-square arrays
         public override void Setup()
         {
             List<string> lines = Tools.GetLines(Input);
@@ -80,20 +81,30 @@ namespace AdventOfCode.Y2021
                 }
         }
 
-        // Assumes that lowest risk paths only go down and to the right (as in the example)
-        // Used this to solve Part 1 and to get incorrect answer on Part 2
-        private int FindLowestRiskPathDownRight()
+        int[,] savedmap;
+
+        private bool ValueChanged(int x, int y) => (riskmap[x, y] != savedmap[x, y]);
+
+        private void WriteMap()
         {
             for (int x = 0; x < width; x++)
+            {
                 for (int y = 0; y < height; y++)
-                {
-                    if (x < width - 1) RiskNextDownRight(riskmap[x, y], x + 1, y);
-                    if (y < height - 1) RiskNextDownRight(riskmap[x, y], x, y + 1);
-                }
+                    Runner.Write($"{riskmap[x, y]:00} ", ValueChanged(x,y) ? ConsoleColor.Red : ConsoleColor.Green);
+                Console.WriteLine();
+            }
+            Console.WriteLine();
 
-            return riskmap[width - 1, height - 1];
+            savedmap = (int[,])riskmap.Clone();
         }
-        // TODO: Fix for above from u/TcMaX on Reddit:
+
+        // === Original version: FindLowestRiskPathLoopDandRRescan(false)
+        // Assumes that lowest risk paths only go down and to the right (as in the sample provided)
+        // Used this to solve Part 1 and to get incorrect answer on Part 2 (and incorrect answer on any input where the solution
+        //  path doesn't go strictly down and right)
+        //
+        // === Modified version: FindLowestRiskPathLoopDandRRescan(true)
+        // Rescan idea from u/TcMaX on Reddit (and now correct for all inputs):
         // Ended up first iterating through the array in the pattern of[0][1], [1] [0], [1] [1] etc, and just filling out
         // the minimum cumulative cost of the one to the left and the one above plus the cost of the current cell.This gives
         // an array of the cumulative costs if you never go left or up. Obviously this was not sufficient, so I added an
@@ -101,13 +112,67 @@ namespace AdventOfCode.Y2021
         // each of the surrounding cells, added the cost of the current cell, and checked if that was less than the cumulative
         // cost already found for that cell. Repeated with a while loop until no changes were made in an entire pass over the
         // array. Not exactly elegant, but it did the job and wasn't too slow (took about 350ms on my machine (M1 Air) on part 2).
+        //
+        // This version took about 1.6s on part 2 versus 16s for the brute force queue
+        private int FindLowestRiskPathLoopDandRRescan(bool rescan)
+        {
+
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                {
+                    if (x < width - 1) RiskNextDownRight(riskmap[x, y], x + 1, y);
+                    if (y < height - 1) RiskNextDownRight(riskmap[x, y], x, y + 1);
+                }
+
+            if (rescan)
+            {
+                //savedmap = new int[width, height];
+                //Console.WriteLine();
+                //WriteMap();
+                int numberNodesChanged;
+                int numberOfRescans = 0;
+
+                do
+                {
+                    numberNodesChanged = 0;
+                    numberOfRescans++;
+                    for (int x = 0; x < width; x++)
+                        for (int y = 0; y < height; y++)
+                        {
+                            int checkValue = LowestRiskMapNeighbor(x, y) + risks[x, y];
+                            if (checkValue < riskmap[x, y])
+                            {
+                                riskmap[x, y] = checkValue;
+                                numberNodesChanged++;
+                            }
+                        }
+                    //Console.WriteLine($"Number of nodes changed = {numberNodesChanged}");
+                    // WriteMap();
+                } while (numberNodesChanged > 0);
+
+                Console.WriteLine($"Number of Rescans = {numberOfRescans}; Total nodes visited = {(width * height) * (numberOfRescans + 1)}");
+            }
+
+            return riskmap[width - 1, height - 1];
+        }
+
+        private int LowestRiskMapNeighbor(int x, int y) => Tools.Min(RiskMapOrMaxInt(x + 1, y), RiskMapOrMaxInt(x - 1, y),
+            RiskMapOrMaxInt(x, y + 1), RiskMapOrMaxInt(x, y - 1));
+
+        private int RiskMapOrMaxInt(int x, int y)
+        {
+            if ((x >= 0) && (y >= 0) && (x < width) && (y < height))
+                return riskmap[x, y];
+            else
+                return int.MaxValue;
+        }
 
         private void RiskNextDownRight(int r, int x, int y) => riskmap[x, y] = Math.Min(riskmap[x, y], r + risks[x, y]);
 
         private Queue<(int, int, int)> q;
         private long nodesVisited = 0;
 
-        private int FindLowestRiskPath()
+        private int FindLowestRiskPathQueue()
         {
             q = new();
             q.Enqueue((0, 0, 0));
@@ -145,15 +210,15 @@ namespace AdventOfCode.Y2021
         [Description("What is the lowest total risk of any path from the top left to the bottom right?")]
         public override string SolvePart1()
         {
-            return FindLowestRiskPath().ToString();
+            return FindLowestRiskPathLoopDandRRescan(true).ToString();
+            //return FindLowestRiskPathQueue().ToString();
         }
 
         [Description("What is the lowest total risk of any path from the top left to the bottom right?")]
         public override string SolvePart2()
         {
             SetupPart2();
-
-            return FindLowestRiskPath().ToString();
+            return SolvePart1();
         }
     }
 }

@@ -58,11 +58,29 @@ namespace AdventOfCode.Core
             return max;
         }
 
+        // public static T Max<T>(params T[] nums) => Max<T>(nums);
+
         public static T Min<T>(IEnumerable<T> values) where T : IComparable<T>
         {
             bool firstElement = true;
             T min = default;
             foreach (T value in values)
+            {
+                if (firstElement)
+                {
+                    min = value; firstElement = false;
+                }
+                else if (value.CompareTo(min) < 0)
+                    min = value;
+            }
+            return min;
+        }
+
+        public static T Min<T>(params T[] nums) where T : IComparable<T>
+        {
+            bool firstElement = true;
+            T min = default;
+            foreach (T value in nums)
             {
                 if (firstElement)
                 {
