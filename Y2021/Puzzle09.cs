@@ -11,7 +11,7 @@ namespace AdventOfCode.Y2021
         private int[,] heightmap;
         private int rows, cols;
 
-        private int MaxDepth = 9;
+        private const int MaxDepth = 9;
 
         public Puzzle09(string input) : base(input) { Name = "Smoke Basin"; }
 
@@ -31,7 +31,7 @@ namespace AdventOfCode.Y2021
 
         private List<int> FindLowPointDepths()
         {
-            List<int> lowPointDepths = new List<int>();
+            List<int> lowPointDepths = new();
 
             for (int r = 0; r < rows; r++)
                 for (int c = 0; c < cols; c++)
@@ -43,7 +43,7 @@ namespace AdventOfCode.Y2021
 
         private List<(int, int)> FindLowPointLocations()
         {
-            List<(int, int)> lowPoints = new List<(int, int)>();
+            List<(int, int)> lowPoints = new();
 
             for (int r = 0; r < rows; r++)
                 for (int c = 0; c < cols; c++)
@@ -79,7 +79,7 @@ namespace AdventOfCode.Y2021
 
         private List<int> FindBasinSizes()
         {
-            List<int> basinSizes = new List<int>();
+            List<int> basinSizes = new();
             List<(int, int)> lowPoints = FindLowPointLocations();
 
             foreach ((int r, int c) in lowPoints)
@@ -90,7 +90,7 @@ namespace AdventOfCode.Y2021
 
         private int BasinSize(int row, int column)
         {
-            Queue<(int, int)> locations = new Queue<(int, int)>();
+            Queue<(int, int)> locations = new();
             locations.Enqueue((row, column));
 
             // Copy heightmap - basin size is determined with destructive flood fill
