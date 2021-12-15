@@ -55,12 +55,12 @@ namespace AdventOfCode.Y2021
         [Description("What is the life support rating of the submarine?")]
         public override string SolvePart2()
         {
-            List<string> oxygenNumbers = new List<string>(numbers);
-            List<string> co2Numbers = new List<string>(numbers);
+            List<string> oxygenNumbers = new(numbers);
+            List<string> co2Numbers = new(numbers);
 
             for (int digitNumber = 0; digitNumber < binaryDigits; digitNumber++)
             {
-                int countOfOnes = countColumnOfOnes(oxygenNumbers, digitNumber);
+                int countOfOnes = CountColumnOfOnes(oxygenNumbers, digitNumber);
                 char keepDigit;
                 if (countOfOnes >= (oxygenNumbers.Count - countOfOnes))
                     keepDigit = '1';
@@ -77,7 +77,7 @@ namespace AdventOfCode.Y2021
 
             for (int digitNumber = 0; digitNumber < binaryDigits; digitNumber++)
             {
-                int countOfOnes = countColumnOfOnes(co2Numbers, digitNumber);
+                int countOfOnes = CountColumnOfOnes(co2Numbers, digitNumber);
                 char keepDigit;
                 if (countOfOnes < (co2Numbers.Count - countOfOnes))
                     keepDigit = '1';
@@ -98,7 +98,7 @@ namespace AdventOfCode.Y2021
             return (oxygenGeneratorRating * co2ScrubberRating).ToString();
         }
 
-        private static int countColumnOfOnes(List<string> numbers, int digit)
+        private static int CountColumnOfOnes(List<string> numbers, int digit)
         {
             int count = 0;
 
