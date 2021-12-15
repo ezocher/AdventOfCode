@@ -98,10 +98,10 @@ namespace AdventOfCode.Y2021
             savedmap = (int[,])riskmap.Clone();
         }
 
-        // === Original version: FindLowestRiskPathLoopDandRRescan(false)
+        // === Original version I wrote: FindLowestRiskPathLoopDandRRescan(false)
         // Assumes that lowest risk paths only go down and to the right (as in the sample provided)
         // Used this to solve Part 1 and to get incorrect answer on Part 2 (and incorrect answer on any input where the solution
-        //  path doesn't go strictly down and right)
+        //   path doesn't go strictly down and right)
         //
         // === Modified version: FindLowestRiskPathLoopDandRRescan(true)
         // Rescan idea from u/TcMaX on Reddit (and now correct for all inputs):
@@ -113,7 +113,7 @@ namespace AdventOfCode.Y2021
         // cost already found for that cell. Repeated with a while loop until no changes were made in an entire pass over the
         // array. Not exactly elegant, but it did the job and wasn't too slow (took about 350ms on my machine (M1 Air) on part 2).
         //
-        // This version took about 1.6s on part 2 versus 16s for the brute force queue
+        // On a Core i7-4770 this version took about 1.6s on part 2 versus 16s for the brute force queue
         private int FindLowestRiskPathLoopDandRRescan(bool rescan)
         {
 
@@ -172,6 +172,8 @@ namespace AdventOfCode.Y2021
         private Queue<(int, int, int)> q;
         private long nodesVisited = 0;
 
+        // This is a brute force version of Dijkstra's algorithm without the priority queue and is correct but slow
+        // TODO: Change this to a proper and optimized Dijkstra's algorithm
         private int FindLowestRiskPathQueue()
         {
             q = new();
