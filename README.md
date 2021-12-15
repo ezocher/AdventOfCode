@@ -12,7 +12,7 @@ https://adventofcode.com/
 ### Puzzles Completed
 | Year | Stars | Completed |
 | ---- | ----- | --------- |
-| 2021 | 29 :star: (AoC++)| 1-14, 15 Part 1 |
+| 2021 | 30 :star: (AoC++)| 1-15 |
 
 ### Superlatives
 | | | |
@@ -29,6 +29,7 @@ https://adventofcode.com/
 |11|2D Int Array|Game of Life-ish||
 |12|Undirected graph|Graph traversal enumeration||
 |13|2D Boolean Array, CharImage|Folding||
-|14|Dictionary<string/char, numeric>, StringBuilder|Matching, counting|
+|14|Dictionary<string/char, numeric>, StringBuilder|Matching, counting||
+|15|2D Arrays, Queue|Finding shortest path||
 
 
