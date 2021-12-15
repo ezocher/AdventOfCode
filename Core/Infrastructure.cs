@@ -41,12 +41,12 @@ namespace AdventOfCode.Core
                     string html = DownloadHtml(web, $"https://adventofcode.com/{year}/day/{day}/input");
                     File.WriteAllText(Path.Combine(inputFilesPath, $@"puzzle{day:00}--.txt"), html.TrimEnd());
                 }
-                Console.WriteLine($"Downloaded input for {year}-{day}");
+                Runner.WriteLine($"Downloaded input for {year}-{day}", ConsoleColor.White);
 
                 // Create empty test input file
                 using (FileStream fs = File.Create(inputFilesPath + $@"\puzzle{day:00}---test.txt"))
                     fs.Close();
-                Console.WriteLine($"Generated empty test input file 'puzzle{day:00}---test.txt'");
+                Runner.WriteLine($"Generated empty test input file 'puzzle{day:00}---test.txt'", ConsoleColor.White);
 
                 return true;
             }
@@ -114,7 +114,7 @@ $@"<head>
             string descriptionPath = Path.Combine(solutionRootPath, $@"Y{year}\Descriptions\puzzle{day:00}.html");
             File.WriteAllText(descriptionPath, descriptionHtml);
 
-            Console.WriteLine($"Downloaded description for {year}-{day}");
+            Runner.WriteLine($"Downloaded description for {year}-{day}", ConsoleColor.White);
 
             return (dayTitle, firstPuzzlePrompt);
         }
@@ -201,7 +201,7 @@ namespace AdventOfCode.Y{year}
 }}";
                 File.WriteAllText(classPath, templateClass);
 
-                Console.WriteLine($"Generated class template for {year}-{day}\n");
+                Runner.WriteLine($"Generated class template for {year}-{day}: {Path.GetFileName(classPath)}\n", ConsoleColor.White);
             }
         }
 

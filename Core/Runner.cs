@@ -156,7 +156,7 @@ namespace AdventOfCode.Core {
                     string newFileName = $"puzzle{day:00}-{answerPart1}-{answerPart2}" + ((inputName != "Given") ? $"-{inputName}.txt" : ".txt");
                     string newName = Path.Combine(Path.GetDirectoryName(oldName), newFileName);
                     File.Move(oldName, newName);
-                    Console.WriteLine($"Renaming '{inputFileName}' -> '{newFileName}'");
+                    WriteLine($"Renaming '{inputFileName}' -> '{newFileName}'", ConsoleColor.White);
                 }
             }
 
