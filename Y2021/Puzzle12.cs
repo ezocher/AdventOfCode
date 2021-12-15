@@ -37,7 +37,7 @@ namespace AdventOfCode.Y2021
                 return caveSystem[s];
             else
             {
-                Cave c = new Cave(s);
+                Cave c = new(s);
                 caveSystem.Add(s, c);
                 return c;
             }
@@ -98,7 +98,7 @@ namespace AdventOfCode.Y2021
         [Description("How many paths through this cave system are there that visit small caves at most once?")]
         public override string SolvePart1()
         {
-            List<Cave> path = new List<Cave>();
+            List<Cave> path = new();
             EnumerateAllPaths(path, true, caveSystem["start"]);
             
             return paths.Count.ToString();
@@ -109,7 +109,7 @@ namespace AdventOfCode.Y2021
         {
             paths = new List<List<Cave>>();
 
-            List<Cave> path = new List<Cave>();
+            List<Cave> path = new();
             EnumerateAllPaths(path, false, caveSystem["start"]);
 
             return paths.Count.ToString();
