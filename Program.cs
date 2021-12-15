@@ -6,14 +6,14 @@ namespace AdventOfCode
 {
     public partial class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             // Run all solutions or run solutions for a specific year
             // Runner.AdventYear(2021); return;
 
             const int Year = 2021;
-            const int Day = 14;
-            const bool Solved = true;
+            const int Day = 15;
+            const bool Solved = false;
 
             // Before puzzle release:
             // * Log in to AoC and verify/update session cookie (if necessary)
