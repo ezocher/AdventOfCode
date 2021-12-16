@@ -83,8 +83,7 @@ namespace AdventOfCode.Y2021
 
         int[,] savedmap;
 
-        private bool ValueChanged(int x, int y) => (riskmap[x, y] != savedmap[x, y]);
-
+        // TODO: Generalize this and move it to Tools
         private void WriteMap()
         {
             for (int x = 0; x < width; x++)
@@ -97,6 +96,7 @@ namespace AdventOfCode.Y2021
 
             savedmap = (int[,])riskmap.Clone();
         }
+        private bool ValueChanged(int x, int y) => (riskmap[x, y] != savedmap[x, y]);
 
         // === Original version I wrote: FindLowestRiskPathLoopDandRRescan(false)
         // Assumes that lowest risk paths only go down and to the right (as in the sample provided)
