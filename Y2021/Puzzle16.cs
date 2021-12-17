@@ -11,12 +11,12 @@ namespace AdventOfCode.Y2021
         private static bool[] bitArray;
         private static int index;
 
-        enum TypeID { Operator = 0, LiteralValue = 4 }
+        enum TypeID { OpSum = 0, OpProduct = 1, OpMinimum = 2, OpMaximum = 3, LiteralValue = 4, 
+            OpGreaterThan = 5, OpLessThan = 6, OpEqualTo = 7 }
         class Packet
         {
             public int Version;
-            // TypeID Type;
-            public int Type;
+            public TypeID Type;
             public int Value;
             public int LengthTypeID;
             public int TotalSubPacketLength;
@@ -26,9 +26,9 @@ namespace AdventOfCode.Y2021
             public Packet()
             {
                 Version = GetNextBits(3);
-                Type = GetNextBits(3);
+                Type = (TypeID)GetNextBits(3);
 
-                if (Type == 4)
+                if (Type == TypeID.LiteralValue)
                 {
                     TotalSubPacketLength = NumberOfSubPackets = 0;
                     SubPackets = null;
@@ -52,7 +52,35 @@ namespace AdventOfCode.Y2021
                     SubPackets = new();
                 }
             }
+
+            public int Evaluate()
+            {
+                if (Type == TypeID.LiteralValue)
+                    return Value;
+
+                List<int> parameters = new();
+
+                foreach (Packet s in SubPackets)
+                    parameters.Add(s.Evaluate());
+
+                if (Type <= TypeID.OpMaximum)
+                    return ArtithmeticOp(Type, parameters);
+                else
+                    return BooleanOp(Type, parameters[0], parameters[1]);
+            }
+
+            private int ArtithmeticOp(TypeID type, List<int> parameters)
+            {
+                throw new NotImplementedException();
+            }
+
+            private int BooleanOp(TypeID type, int v1, int v2)
+            {
+                throw new NotImplementedException();
+            }
         }
+
+
 
         public Puzzle16(string input) : base(input) { Name = "Packet Decoder"; }
 
@@ -121,7 +149,7 @@ namespace AdventOfCode.Y2021
                     Packet subPacket = new Packet();
                     p.SubPackets.Add(subPacket);
                     totalVersionNumbers += subPacket.Version;
-                    if (subPacket.Type != 4)
+                    if (subPacket.Type != TypeID.LiteralValue)
                         totalVersionNumbers += ProcessSubPackets(subPacket);
                 } while (index < endingIndex);
             }
@@ -132,7 +160,7 @@ namespace AdventOfCode.Y2021
                     Packet subPacket = new Packet();
                     p.SubPackets.Add(subPacket);
                     totalVersionNumbers += subPacket.Version;
-                    if (subPacket.Type != 4)
+                    if (subPacket.Type != TypeID.LiteralValue)
                         totalVersionNumbers += ProcessSubPackets(subPacket);
                 }
             }
@@ -161,9 +189,8 @@ namespace AdventOfCode.Y2021
         [Description("What do you get if you evaluate the expression represented by your hexadecimal-encoded BITS transmission?")]
         public override string SolvePart2()
         {
-            Setup();
 
-            return string.Empty;
+            return p.Evaluate();
         }
     }
 }
