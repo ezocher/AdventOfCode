@@ -8,14 +8,15 @@ namespace AdventOfCode.Y2021
 {
     public class Puzzle16 : ASolver 
     {
+        // TODO: Put the bit array in a class, consider moving to Common
         private static bool[] bitArray;
         private static int index;
         private static Packet rootPacket;
 
-        enum TypeID { OpSum = 0, OpProduct = 1, OpMinimum = 2, OpMaximum = 3, LiteralValue = 4, 
-            OpGreaterThan = 5, OpLessThan = 6, OpEqualTo = 7 }
         class Packet
         {
+            public enum TypeID { Sum = 0, Product = 1, Minimum = 2, Maximum = 3, LiteralValue = 4, GreaterThan = 5, LessThan = 6, EqualTo = 7 }
+
             public int Version;
             public TypeID Type;
             public long Value;
@@ -54,6 +55,37 @@ namespace AdventOfCode.Y2021
                 }
             }
 
+            public int ProcessSubPackets()
+            {
+                int totalVersionNumbers = 0;
+
+                if (this.LengthTypeID == 0)
+                {
+                    int endingIndex = index + this.TotalSubPacketLength;
+                    do
+                    {
+                        Packet subPacket = new Packet();
+                        this.SubPackets.Add(subPacket);
+                        totalVersionNumbers += subPacket.Version;
+                        if (subPacket.Type != TypeID.LiteralValue)
+                            totalVersionNumbers += subPacket.ProcessSubPackets();
+                    } while (index < endingIndex);
+                }
+                else
+                {
+                    for (int i = 1; i <= this.NumberOfSubPackets; i++)
+                    {
+                        Packet subPacket = new Packet();
+                        this.SubPackets.Add(subPacket);
+                        totalVersionNumbers += subPacket.Version;
+                        if (subPacket.Type != TypeID.LiteralValue)
+                            totalVersionNumbers += subPacket.ProcessSubPackets();
+                    }
+                }
+
+                return totalVersionNumbers;
+            }
+
             public long Evaluate()
             {
                 if (Type == TypeID.LiteralValue)
@@ -71,27 +103,25 @@ namespace AdventOfCode.Y2021
             {
                 switch (type)
                 {
-                    case TypeID.OpSum:
+                    case TypeID.Sum:
                         return Tools.Sum(operands);
-                    case TypeID.OpProduct:
+                    case TypeID.Product:
                         return Tools.Product(operands);
-                    case TypeID.OpMinimum:
+                    case TypeID.Minimum:
                         return Tools.Min<long>(operands);
-                    case TypeID.OpMaximum:
+                    case TypeID.Maximum:
                         return Tools.Max<long>(operands);
-                    case TypeID.OpGreaterThan:
+                    case TypeID.GreaterThan:
                         return (operands[0] > operands[1]) ? 1 : 0;
-                    case TypeID.OpLessThan:
-                        return (operands[0] < operands[1]) ? 1 : 0; ;
-                    case TypeID.OpEqualTo:
-                        return (operands[0] == operands[1]) ? 1 : 0; ;
+                    case TypeID.LessThan:
+                        return (operands[0] < operands[1]) ? 1 : 0;
+                    case TypeID.EqualTo:
+                        return (operands[0] == operands[1]) ? 1 : 0;
                     default:
                         return 0;
                 }
             }
         }
-
-
 
         public Puzzle16(string input) : base(input) { Name = "Packet Decoder"; }
 
@@ -111,7 +141,7 @@ namespace AdventOfCode.Y2021
 
         private void DecodeHex(char c, int bi)
         {
-            int value = HexValue(c);
+            int value = HexDigitValue(c);
             for (int d = 3; d >= 0; d--)
             {
                 bitArray[bi + d] = ((value % 2) == 1);
@@ -119,7 +149,7 @@ namespace AdventOfCode.Y2021
             }
         }
 
-        public static int HexValue(char hex) => (int)hex - ((int)hex <= (int)'9' ? (int)'0' : ((int)'A' - 10));
+        public static int HexDigitValue(char hex) => (int)hex - ((int)hex <= (int)'9' ? (int)'0' : ((int)'A' - 10));
 
         private static int GetNextBits(int numBits)
         {
@@ -148,37 +178,6 @@ namespace AdventOfCode.Y2021
             return result;
         }
 
-        private int ProcessSubPackets(Packet p)
-        {
-            int totalVersionNumbers = 0;
-
-            if (p.LengthTypeID == 0)
-            {
-                int endingIndex = index + p.TotalSubPacketLength;
-                do
-                {
-                    Packet subPacket = new Packet();
-                    p.SubPackets.Add(subPacket);
-                    totalVersionNumbers += subPacket.Version;
-                    if (subPacket.Type != TypeID.LiteralValue)
-                        totalVersionNumbers += ProcessSubPackets(subPacket);
-                } while (index < endingIndex);
-            }
-            else
-            {
-                for (int i = 1; i <= p.NumberOfSubPackets; i++)
-                {
-                    Packet subPacket = new Packet();
-                    p.SubPackets.Add(subPacket);
-                    totalVersionNumbers += subPacket.Version;
-                    if (subPacket.Type != TypeID.LiteralValue)
-                        totalVersionNumbers += ProcessSubPackets(subPacket);
-                }
-            }
-
-            return totalVersionNumbers;
-        }
-
         [Description("what do you get if you add up the version numbers in all packets?")]
         public override string SolvePart1()
         {
@@ -194,7 +193,7 @@ namespace AdventOfCode.Y2021
                     firstPacket = false;
                 }
                 if ((p.NumberOfSubPackets > 0) || (p.TotalSubPacketLength > 0))
-                    totalVersionNumbers += ProcessSubPackets(p);
+                    totalVersionNumbers += p.ProcessSubPackets();
                 SkipPadding();
 
                 totalVersionNumbers += p.Version;
