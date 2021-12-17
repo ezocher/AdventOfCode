@@ -92,6 +92,20 @@ namespace AdventOfCode.Core
             return min;
         }
 
+        public static long Product(List<long> nums)
+        {
+            long product = 1;
+            foreach (long n in nums) product *= n;
+            return product;
+        }
+
+        public static long Sum(List<long> nums)
+        {
+            long sum = 0;
+            foreach (long n in nums) sum += n;
+            return sum;
+        }
+
         public static long Sum(params long[] nums)
         {
             long sum = 0;

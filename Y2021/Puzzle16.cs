@@ -10,6 +10,7 @@ namespace AdventOfCode.Y2021
     {
         private static bool[] bitArray;
         private static int index;
+        private static Packet rootPacket;
 
         enum TypeID { OpSum = 0, OpProduct = 1, OpMinimum = 2, OpMaximum = 3, LiteralValue = 4, 
             OpGreaterThan = 5, OpLessThan = 6, OpEqualTo = 7 }
@@ -17,7 +18,7 @@ namespace AdventOfCode.Y2021
         {
             public int Version;
             public TypeID Type;
-            public int Value;
+            public long Value;
             public int LengthTypeID;
             public int TotalSubPacketLength;
             public int NumberOfSubPackets;
@@ -53,30 +54,40 @@ namespace AdventOfCode.Y2021
                 }
             }
 
-            public int Evaluate()
+            public long Evaluate()
             {
                 if (Type == TypeID.LiteralValue)
                     return Value;
 
-                List<int> parameters = new();
+                List<long> operands = new();
 
                 foreach (Packet s in SubPackets)
-                    parameters.Add(s.Evaluate());
+                    operands.Add(s.Evaluate());
 
-                if (Type <= TypeID.OpMaximum)
-                    return ArtithmeticOp(Type, parameters);
-                else
-                    return BooleanOp(Type, parameters[0], parameters[1]);
+                return PerformOperation(Type, operands);
             }
 
-            private int ArtithmeticOp(TypeID type, List<int> parameters)
+            private long PerformOperation(TypeID type, List<long> operands)
             {
-                throw new NotImplementedException();
-            }
-
-            private int BooleanOp(TypeID type, int v1, int v2)
-            {
-                throw new NotImplementedException();
+                switch (type)
+                {
+                    case TypeID.OpSum:
+                        return Tools.Sum(operands);
+                    case TypeID.OpProduct:
+                        return Tools.Product(operands);
+                    case TypeID.OpMinimum:
+                        return Tools.Min<long>(operands);
+                    case TypeID.OpMaximum:
+                        return Tools.Max<long>(operands);
+                    case TypeID.OpGreaterThan:
+                        return (operands[0] > operands[1]) ? 1 : 0;
+                    case TypeID.OpLessThan:
+                        return (operands[0] < operands[1]) ? 1 : 0; ;
+                    case TypeID.OpEqualTo:
+                        return (operands[0] == operands[1]) ? 1 : 0; ;
+                    default:
+                        return 0;
+                }
             }
         }
 
@@ -127,9 +138,9 @@ namespace AdventOfCode.Y2021
                 index += (8 - index % 8);
         }
 
-        private static int BitsToValue(List<bool> bits)
+        private static long BitsToValue(List<bool> bits)
         {
-            int result = 0;
+            long result = 0;
 
             foreach (bool bit in bits)
                 result = (result << 1) + (bit ? 1 : 0);
@@ -172,10 +183,16 @@ namespace AdventOfCode.Y2021
         public override string SolvePart1()
         {
             int totalVersionNumbers = 0;
+            bool firstPacket = true;
 
             while (index < bitArray.Length)
             {
                 Packet p = new Packet();
+                if (firstPacket)
+                {
+                    rootPacket = p;
+                    firstPacket = false;
+                }
                 if ((p.NumberOfSubPackets > 0) || (p.TotalSubPacketLength > 0))
                     totalVersionNumbers += ProcessSubPackets(p);
                 SkipPadding();
@@ -189,8 +206,7 @@ namespace AdventOfCode.Y2021
         [Description("What do you get if you evaluate the expression represented by your hexadecimal-encoded BITS transmission?")]
         public override string SolvePart2()
         {
-
-            return p.Evaluate();
+            return rootPacket.Evaluate().ToString();
         }
     }
 }

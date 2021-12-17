@@ -12,7 +12,7 @@ https://adventofcode.com/
 ### Puzzles Completed
 | Year | Stars | Completed |
 | ---- | ----- | --------- |
-| 2021 | 31 :star: (AoC++)| 1-15 |
+| 2021 | 32 :star: (AoC++)| 1-16 |
 
 ### Superlatives
 | | | |
@@ -20,7 +20,7 @@ https://adventofcode.com/
 | Best Solution | 2021 Puzzle 10 | Solved cleanly and then refactored |
 | Worst Solution | 2021 Puzzle 8 | Prematurely overgeneralized and overcomplicated |
 | Best Finish | 2021 Puzzle 11 Part 1 | 2795th |
-| Worst Finish | 2021 Puzzle 8 Part 2 | 15607th |
+| Worst Finish | 2021 Puzzle 16 Part 2 | 19015th |
 
 ### Data Structures/Algorithms Used
 | Puzzle | DS/Classes|Algorithms | Notes |
@@ -31,5 +31,7 @@ https://adventofcode.com/
 |13|2D Boolean Array, CharImage|Folding||
 |14|Dictionary<string/char, numeric>, StringBuilder|Matching, counting||
 |15|2D Arrays, Queue|Finding shortest path||
+|16|Bit array, Operator & operands class|Decoding bit-based protocol, simple operator evaluation||
+
 
 
