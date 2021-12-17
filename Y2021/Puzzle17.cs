@@ -43,12 +43,13 @@ namespace AdventOfCode.Y2021
             return (hit, maxY);
         }
 
+        // Quadratic formula lets us derive possible initial values for X velocity for a hyperbolic trajectory
         private static double XVelocityToReachTarget(int x) => ((Math.Sqrt((8.0 * (double)x) + 1.0) - 1.0) / 2.0);
 
         [Description("What is the highest y position it reaches on this trajectory?")]
         public override string SolvePart1()
         {
-            bool verbose = true;
+            bool verbose = false;
 
             int minVX = (int)Math.Truncate(XVelocityToReachTarget(xLeft)) + 1;
             int maxVX = (int)Math.Truncate(XVelocityToReachTarget(xRight));
@@ -58,6 +59,7 @@ namespace AdventOfCode.Y2021
             bool hit;
             int y;
 
+            // Determined yV of 400 needed for given input by trial and observation
             for (int vX = minVX; vX <= maxVX; vX++)
                 for (int vY = 1; vY < 400; vY++)
                 {
@@ -75,12 +77,40 @@ namespace AdventOfCode.Y2021
             return highestY.ToString();
         }
 
-        [Description("What is the highest y position it reaches on this trajectory?")]
+        [Description("How many distinct initial velocity values cause the probe to be within the target area after any step?")]
         public override string SolvePart2()
         {
-            Setup();    // Remove if Part 2 builds on output of Part 1
+            bool verbose = false;
 
-            return string.Empty;
+            int minVXUpshot = (int)Math.Truncate(XVelocityToReachTarget(xLeft)) + 1;
+            int maxVXUpshot = (int)Math.Truncate(XVelocityToReachTarget(xRight));
+            int hitCount = 0;
+            bool hit;
+            int y;
+
+            // Shoot Up
+            // Determined yV of 400 needed for given input by trial and observation
+            for (int vX = minVXUpshot; vX <= maxVXUpshot; vX++)
+                for (int vY = yTop; vY < 400; vY++)
+                {
+                    (hit, y) = FireShot(vX, vY);
+                    if (hit) hitCount++;
+                    if (verbose) Runner.WriteLine($"Shot {vX}, {vY} {hit} {hitCount}", hit ? ConsoleColor.White : ConsoleColor.Red);
+                }
+
+            // Shoot Down(ish)
+            // We could pretty easily derive the one step and two step shots that hit in order to minimize the iterations required below,
+            //  but this already runs pretty fast
+            // Determined that vY needs to go to 1 instead of 0 by trial and observation
+            for (int vX = maxVXUpshot + 1; vX <= xRight; vX++)
+                for (int vY = yBottom; vY <= 1; vY++)
+                {
+                    (hit, y) = FireShot(vX, vY);
+                    if (hit) hitCount++;
+                    if (verbose) Runner.WriteLine($"Shot {vX}, {vY} {hit} {hitCount}", hit ? ConsoleColor.White : ConsoleColor.Red);
+                }
+
+            return hitCount.ToString();
         }
     }
 }
