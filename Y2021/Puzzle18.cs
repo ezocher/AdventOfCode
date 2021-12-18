@@ -285,9 +285,11 @@ namespace AdventOfCode.Y2021
 
         public Puzzle18(string input) : base(input) { Name = "Snailfish"; }
 
+        private List<string> lines;
+
         public override void Setup()
         {
-            List<string> lines = Tools.GetLines(Input);
+            lines = Tools.GetLines(Input);
 
             numbers = new();
 
@@ -308,9 +310,17 @@ namespace AdventOfCode.Y2021
         [Description("What is the magnitude of the final sum?")]
         public override string SolvePart2()
         {
-            Setup();    // Remove if Part 2 builds on output of Part 1
+            long maxMagnitude = 0;
 
-            return string.Empty;
+            for (int i = 0; i < lines.Count; i++)
+                for (int j = 0; j < lines.Count; j++)
+                    if (i != j)
+                    {
+                        Pair sum = new Pair(lines[i]).Add(new Pair(lines[j]));
+                        maxMagnitude = Math.Max(sum.Magnitude(), maxMagnitude);
+                    }
+
+            return maxMagnitude.ToString();
         }
     }
 }
