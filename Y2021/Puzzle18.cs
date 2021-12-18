@@ -10,6 +10,9 @@ namespace AdventOfCode.Y2021
     {
         List<Pair> numbers;
 
+        // TODO: Create an Element struct or class and refactor Pair to a left Element and right Element
+        // TODO: Change these to they nasmes they would be in a Lisp
+        // TODO: Pull out refactored and renamed Element and Pair into Common
         class Pair
         {
             const char Open =  '[';
@@ -73,7 +76,6 @@ namespace AdventOfCode.Y2021
                 LeftPair = RightPair = null;
             }
 
-
             public Pair Add(Pair p)
             {
                 Pair sum = new Pair(0, 0);
@@ -93,14 +95,22 @@ namespace AdventOfCode.Y2021
 
             public void Reduce()
             {
+                const bool verbose = false;
+                if (verbose) Console.WriteLine($"\nReduce {this}");
+
                 bool actionApplied;
                 do
                 {
-                    //Console.WriteLine(this);
                     if (this.Explode())
+                    {
                         actionApplied = true;
+                        if (verbose) Console.WriteLine($"Exploded => {this}");
+                    }
                     else if (this.Split())
+                    {
                         actionApplied = true;
+                        if (verbose) Console.WriteLine($"Split => {this}");
+                    }
                     else
                         actionApplied = false;
 
@@ -214,16 +224,19 @@ namespace AdventOfCode.Y2021
                     return didSplit;
                 }
 
-                if (!didSplit && this.RIsPair)
+                if (!didSplit)
                 {
-                    didSplit = this.RightPair.Split();
-                }
-                else if (RightValue > MaxValue)
-                {
-                    this.RIsPair = true;
-                    this.RightPair = CreateSplit(RightValue);
-                    didSplit = true;
-                    return didSplit;
+                    if (this.RIsPair)
+                    {
+                        didSplit = this.RightPair.Split();
+                    }
+                    else if (RightValue > MaxValue)
+                    {
+                        this.RIsPair = true;
+                        this.RightPair = CreateSplit(RightValue);
+                        didSplit = true;
+                        return didSplit;
+                    }
                 }
 
                 return didSplit;
@@ -253,19 +266,27 @@ namespace AdventOfCode.Y2021
 
             public long Magnitude()
             {
-                long mag = 0;
+                long left, right;
+                left = right = 0;
 
-                return mag;
+                if (this.LIsPair)
+                    left = LeftPair.Magnitude();
+                else
+                    left = LeftValue;
+
+                if (this.RIsPair)
+                    right = RightPair.Magnitude();
+                else
+                    right = RightValue;
+
+                return (3 * left) + (2 * right);
             }
         }
-
-
 
         public Puzzle18(string input) : base(input) { Name = "Snailfish"; }
 
         public override void Setup()
         {
-
             List<string> lines = Tools.GetLines(Input);
 
             numbers = new();
@@ -277,18 +298,11 @@ namespace AdventOfCode.Y2021
         [Description("What is the magnitude of the final sum?")]
         public override string SolvePart1()
         {
-            //Pair sum = numbers[0].Add(numbers[1]);
-            //Console.WriteLine(sum);
-            //for (int i = 2; i < numbers.Count; i++)
-            //{
-            //    sum = sum.Add(numbers[i]);
-            //    Console.WriteLine(sum);
-            //}
+            Pair sum = numbers[0].Add(numbers[1]);
+            for (int i = 2; i < numbers.Count; i++)
+                sum = sum.Add(numbers[i]);
 
-            Pair x = new Pair("[[[[[7,0],[7,7]],[[7,7],[7,8]]],[[[7,7],[8,8]],[[7,7],[8,7]]]],[7,[5,[[3, 8],[1, 4]]]]]");
-            x.Reduce();
-
-            return string.Empty;
+            return sum.Magnitude().ToString();
         }
 
         [Description("What is the magnitude of the final sum?")]
