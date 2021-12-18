@@ -21,7 +21,7 @@ https://adventofcode.com/
 | Worst Solution | 2021 Puzzle 8 | Prematurely overgeneralized and overcomplicated |
 | Best Finish | 2021 Puzzle 11 Part 1 | 2795th |
 | Worst Finish | 2021 Puzzle 16 Part 2 | 19015th |
-| Hardest Puzzle | 2021 Puzzle 18 Part 1 | 11148th in 17:52:36 |
+| Hardest Puzzle | 2021 Puzzle 18 Part 1 | 11148th in 17:52:36 (about 5 hrs. of work) |
 
 ### Data Structures/Algorithms Used
 | Puzzle | DS/Classes|Algorithms | Notes |
