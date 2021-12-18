@@ -14,6 +14,7 @@ namespace AdventOfCode.Y2021
         {
             const char Open =  '[';
             const char Close = ']';
+            const int MaxValue = 9;
             
             bool LIsPair;
             int LeftValue;
@@ -24,8 +25,6 @@ namespace AdventOfCode.Y2021
 
             public Pair(string line)
             {
-                Console.Write($"{line} ");
-
                 int centerCommaIndex = -1;
 
                 // line[0] == Open by definition
@@ -66,20 +65,38 @@ namespace AdventOfCode.Y2021
                     RightPair = new Pair(line.Substring(centerCommaIndex + 1, line.Length - centerCommaIndex - 2));
             }
 
-            public Pair(Pair p, Pair q)
+            public Pair(int l, int r)
             {
-                LIsPair = RIsPair = true;
-                LeftValue = RightValue = 0;
-                LeftPair = p;
-                RightPair = q;
-                this.Reduce();
+                LIsPair = RIsPair = false;
+                LeftValue = l;
+                RightValue = r;
+                LeftPair = RightPair = null;
             }
 
-            private void Reduce()
+
+            public Pair Add(Pair p)
+            {
+                Pair sum = new Pair(0, 0);
+                sum.LIsPair = sum.RIsPair = true;
+                sum.LeftPair = this;
+                sum.RightPair = p;
+                sum.Reduce();
+                return sum;
+            }
+
+            public override string ToString()
+            {
+                string lString = LIsPair ? LeftPair.ToString() : LeftValue.ToString();
+                string rString = RIsPair ? RightPair.ToString() : RightValue.ToString();
+                return new string("[" + lString + "," + rString + "]");
+            }
+
+            public void Reduce()
             {
                 bool actionApplied;
                 do
                 {
+                    //Console.WriteLine(this);
                     if (this.Explode())
                         actionApplied = true;
                     else if (this.Split())
@@ -94,25 +111,49 @@ namespace AdventOfCode.Y2021
 
             public bool Explode()
             {
-                int propagateLeft, propagateRight;
-                return this.CheckExplode(1, out propagateLeft, out propagateRight);
+                int propagateLeft = UsedValue;
+                int propagateRight = UsedValue;
+                bool didExplode = false;
+                this.CheckExplode(1, ref propagateLeft, ref propagateRight, ref didExplode);
+                return didExplode;
             }
 
-            private bool CheckExplode(int nesting, out int propagateLeft, out int propagateRight)
+            private void PropogateRight(ref int propagateRight)
+            {
+                if (this.LIsPair)
+                    this.LeftPair.PropogateRight(ref propagateRight);
+                else
+                {
+                    this.LeftValue += propagateRight;
+                    propagateRight = UsedValue;
+                }
+            }
+
+            private void PropogateLeft(ref int propagateLeft)
+            {
+                if (this.RIsPair)
+                    this.RightPair.PropogateLeft(ref propagateLeft);
+                else
+                {
+                    this.RightValue += propagateLeft;
+                    propagateLeft = UsedValue;
+                }
+            }
+
+            private void CheckExplode(int nesting, ref int propagateLeft, ref int propagateRight, ref bool didExplode)
             {
                 propagateLeft = propagateRight = 0;
-                bool didExplode = false;
 
                 if (nesting == 5)
                 {
                     propagateLeft = LeftValue;
                     propagateRight = RightValue;
-                    return true;
+                    didExplode = true;
                 }
 
                 if (this.LIsPair)
                 {
-                    didExplode = this.LeftPair.CheckExplode(nesting + 1, out propagateLeft, out propagateRight);
+                    this.LeftPair.CheckExplode(nesting + 1, ref propagateLeft, ref propagateRight, ref didExplode);
 
                     if (didExplode && (nesting == 4))
                     {
@@ -121,16 +162,21 @@ namespace AdventOfCode.Y2021
                         this.LeftValue = 0;
                     }
 
-                    if (didExplode && !this.RIsPair && (propagateRight != UsedValue))
+                    if (didExplode && (propagateRight != UsedValue))
                     {
-                        this.RightValue += propagateRight;
-                        propagateRight = UsedValue;
+                        if (!this.RIsPair)
+                        {
+                            this.RightValue += propagateRight;
+                            propagateRight = UsedValue;
+                        }
+                        else
+                            this.RightPair.PropogateRight(ref propagateRight);
                     }
                 }
 
                 if (!didExplode && this.RIsPair)
                 {
-                    didExplode = this.RightPair.CheckExplode(nesting + 1, out propagateLeft, out propagateRight);
+                    this.RightPair.CheckExplode(nesting + 1, ref propagateLeft, ref propagateRight, ref didExplode);
 
                     if (didExplode && (nesting == 4))
                     {
@@ -139,18 +185,53 @@ namespace AdventOfCode.Y2021
                         this.RightValue = 0;
                     }
 
-                    if (didExplode && !this.LIsPair && (propagateLeft != UsedValue))
+                    if (didExplode && (propagateLeft != UsedValue))
                     {
-                        this.LeftValue += propagateLeft;
-                        propagateLeft = UsedValue;
+                        if (!this.LIsPair)
+                        {
+                            this.LeftValue += propagateLeft;
+                            propagateLeft = UsedValue;
+                        }
+                        else
+                            this.LeftPair.PropogateLeft(ref propagateLeft);
                     }
                 }
-                return didExplode;
             }
 
-            private bool Split()
+            public bool Split()
             {
-                return false;
+                bool didSplit = false;
+
+                if (this.LIsPair)
+                {
+                    didSplit = this.LeftPair.Split();
+                }
+                else if (LeftValue > MaxValue)
+                {
+                    this.LIsPair = true;
+                    this.LeftPair = CreateSplit(LeftValue);
+                    didSplit = true;
+                    return didSplit;
+                }
+
+                if (!didSplit && this.RIsPair)
+                {
+                    didSplit = this.RightPair.Split();
+                }
+                else if (RightValue > MaxValue)
+                {
+                    this.RIsPair = true;
+                    this.RightPair = CreateSplit(RightValue);
+                    didSplit = true;
+                    return didSplit;
+                }
+
+                return didSplit;
+            }
+
+            private Pair CreateSplit(int i)
+            {
+                return new Pair(i / 2, i / 2 + i % 2);
             }
 
             private int FindCenterComma(string line)
@@ -170,11 +251,6 @@ namespace AdventOfCode.Y2021
                 return index;
             }
 
-            public Pair Add(Pair q)
-            {
-                return new Pair("[1,1]");
-            }
-
             public long Magnitude()
             {
                 long mag = 0;
@@ -189,26 +265,29 @@ namespace AdventOfCode.Y2021
 
         public override void Setup()
         {
+
             List<string> lines = Tools.GetLines(Input);
 
             numbers = new();
 
             foreach (string line in lines)
                 numbers.Add(new Pair(line));
-
-
         }
 
         [Description("What is the magnitude of the final sum?")]
         public override string SolvePart1()
         {
-            Pair x = new Pair("[[[[[9,8],1],2],3],4]");
-            x.Explode();
+            //Pair sum = numbers[0].Add(numbers[1]);
+            //Console.WriteLine(sum);
+            //for (int i = 2; i < numbers.Count; i++)
+            //{
+            //    sum = sum.Add(numbers[i]);
+            //    Console.WriteLine(sum);
+            //}
 
-            foreach (Pair number in numbers)
-            {
-                
-            }
+            Pair x = new Pair("[[[[[7,0],[7,7]],[[7,7],[7,8]]],[[[7,7],[8,8]],[[7,7],[8,7]]]],[7,[5,[[3, 8],[1, 4]]]]]");
+            x.Reduce();
+
             return string.Empty;
         }
 
