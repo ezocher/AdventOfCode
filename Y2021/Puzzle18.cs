@@ -6,91 +6,115 @@ using System.ComponentModel;
 
 namespace AdventOfCode.Y2021
 {
-    public class Puzzle18 : ASolver 
+    public class Puzzle18 : ASolver
     {
         List<Pair> numbers;
 
-        // TODO: Create an Element struct or class and refactor Pair to a left Element and right Element
-        // TODO: Change these to they nasmes they would be in a Lisp
-        // TODO: Pull out refactored and renamed Element and Pair into Common
+        struct Element
+        {
+            public bool IsValue;
+            public int Value;
+            public Pair P;
+
+            public Element(int v)
+            {
+                IsValue = true;
+                Value = v;
+                P = null;
+            }
+
+            public Element(Pair p)
+            {
+                IsValue = false;
+                Value = 0;
+                P = p;
+            }
+
+            public bool IsPair => !IsValue;
+
+            public override string ToString() => (IsValue ? Value.ToString() : P.ToString());
+        }
+
         class Pair
         {
-            const char Open =  '[';
+            const char Open = '[';
             const char Close = ']';
             const int MaxValue = 9;
-            
-            bool LIsPair;
-            int LeftValue;
-            Pair LeftPair;
-            bool RIsPair;
-            int RightValue;
-            Pair RightPair;
+
+            Element Left;
+            Element Right;
 
             public Pair(string line)
             {
                 int centerCommaIndex = -1;
+                bool LeftIsPair, RightIsPair;
 
                 // line[0] == Open by definition
                 if (line[1] == Open)
                 {
-                    LIsPair = true;
-                    LeftValue = 0;
+                    LeftIsPair = true;
                 }
                 else
                 {
-                    LIsPair = false;
-                    LeftValue = int.Parse(new string(line[1], 1));
-                    LeftPair = null;
+                    LeftIsPair = false;
+                    Left = new Element(int.Parse(new string(line[1], 1)));
                     centerCommaIndex = 1 + 1;
                 }
 
                 // line[Len - 1] == Close by definition
                 if (line[line.Length - 2] == Close)
                 {
-                    RIsPair = true;
-                    RightValue = 0;
+                    RightIsPair = true;
                 }
                 else
                 {
-                    RIsPair = false;
-                    RightValue = int.Parse(new string(line[line.Length - 2], 1));
-                    RightPair = null;
+                    RightIsPair = false;
+                    Right = new Element(int.Parse(new string(line[line.Length - 2], 1)));
                     centerCommaIndex = line.Length - 2 - 1;
                 }
 
-                if (LIsPair && RIsPair)
+                if (LeftIsPair && RightIsPair)
                     centerCommaIndex = FindCenterComma(line);
 
-                if (LIsPair)
-                    LeftPair = new Pair(line.Substring(1, centerCommaIndex - 1));
+                if (LeftIsPair)
+                    Left = new Element(new Pair(line.Substring(1, centerCommaIndex - 1)));
 
-                if (RIsPair)
-                    RightPair = new Pair(line.Substring(centerCommaIndex + 1, line.Length - centerCommaIndex - 2));
+                if (RightIsPair)
+                    Right = new Element(new Pair(line.Substring(centerCommaIndex + 1, line.Length - centerCommaIndex - 2)));
             }
 
             public Pair(int l, int r)
             {
-                LIsPair = RIsPair = false;
-                LeftValue = l;
-                RightValue = r;
-                LeftPair = RightPair = null;
+                Left = new Element(l);
+                Right = new Element(r);
             }
 
             public Pair Add(Pair p)
             {
                 Pair sum = new Pair(0, 0);
-                sum.LIsPair = sum.RIsPair = true;
-                sum.LeftPair = this;
-                sum.RightPair = p;
+                sum.Left = new Element(this);
+                sum.Right = new Element(p);
                 sum.Reduce();
                 return sum;
             }
 
-            public override string ToString()
+            public override string ToString() => ($"[{Left}, {Right}]");
+
+            private int FindCenterComma(string line)
             {
-                string lString = LIsPair ? LeftPair.ToString() : LeftValue.ToString();
-                string rString = RIsPair ? RightPair.ToString() : RightValue.ToString();
-                return new string("[" + lString + "," + rString + "]");
+                int index = 1;
+                int openCount = 0;
+
+                do
+                {
+                    if (line[index] == Open)
+                        openCount++;
+                    else if (line[index] == Close)
+                        openCount--;
+                    index++;
+                } while (openCount > 0);
+
+                return index;
             }
 
             public void Reduce()
@@ -124,28 +148,28 @@ namespace AdventOfCode.Y2021
                 int propagateLeft = UsedValue;
                 int propagateRight = UsedValue;
                 bool didExplode = false;
-                this.CheckExplode(1, ref propagateLeft, ref propagateRight, ref didExplode);
+                CheckExplode(1, ref propagateLeft, ref propagateRight, ref didExplode);
                 return didExplode;
             }
 
             private void PropogateRight(ref int propagateRight)
             {
-                if (this.LIsPair)
-                    this.LeftPair.PropogateRight(ref propagateRight);
+                if (Left.IsPair)
+                    Left.P.PropogateRight(ref propagateRight);
                 else
                 {
-                    this.LeftValue += propagateRight;
+                    Left.Value += propagateRight;
                     propagateRight = UsedValue;
                 }
             }
 
             private void PropogateLeft(ref int propagateLeft)
             {
-                if (this.RIsPair)
-                    this.RightPair.PropogateLeft(ref propagateLeft);
+                if (Right.IsPair)
+                    Right.P.PropogateLeft(ref propagateLeft);
                 else
                 {
-                    this.RightValue += propagateLeft;
+                    Right.Value += propagateLeft;
                     propagateLeft = UsedValue;
                 }
             }
@@ -156,54 +180,47 @@ namespace AdventOfCode.Y2021
 
                 if (nesting == 5)
                 {
-                    propagateLeft = LeftValue;
-                    propagateRight = RightValue;
+                    propagateLeft = Left.Value;
+                    propagateRight = Right.Value;
                     didExplode = true;
                 }
 
-                if (this.LIsPair)
+                if (Left.IsPair)
                 {
-                    this.LeftPair.CheckExplode(nesting + 1, ref propagateLeft, ref propagateRight, ref didExplode);
+                    Left.P.CheckExplode(nesting + 1, ref propagateLeft, ref propagateRight, ref didExplode);
 
                     if (didExplode && (nesting == 4))
-                    {
-                        this.LeftPair = null;
-                        this.LIsPair = false;
-                        this.LeftValue = 0;
-                    }
+                        Left = new Element(0);
+
 
                     if (didExplode && (propagateRight != UsedValue))
                     {
-                        if (!this.RIsPair)
+                        if (Right.IsValue)
                         {
-                            this.RightValue += propagateRight;
+                            Right.Value += propagateRight;
                             propagateRight = UsedValue;
                         }
                         else
-                            this.RightPair.PropogateRight(ref propagateRight);
+                            Right.P.PropogateRight(ref propagateRight);
                     }
                 }
 
-                if (!didExplode && this.RIsPair)
+                if (!didExplode && Right.IsPair)
                 {
-                    this.RightPair.CheckExplode(nesting + 1, ref propagateLeft, ref propagateRight, ref didExplode);
+                    Right.P.CheckExplode(nesting + 1, ref propagateLeft, ref propagateRight, ref didExplode);
 
                     if (didExplode && (nesting == 4))
-                    {
-                        this.RightPair = null;
-                        this.RIsPair = false;
-                        this.RightValue = 0;
-                    }
+                        Right = new Element(0);
 
                     if (didExplode && (propagateLeft != UsedValue))
                     {
-                        if (!this.LIsPair)
+                        if (Left.IsValue)
                         {
-                            this.LeftValue += propagateLeft;
+                            Left.Value += propagateLeft;
                             propagateLeft = UsedValue;
                         }
                         else
-                            this.LeftPair.PropogateLeft(ref propagateLeft);
+                            Left.P.PropogateLeft(ref propagateLeft);
                     }
                 }
             }
@@ -212,28 +229,26 @@ namespace AdventOfCode.Y2021
             {
                 bool didSplit = false;
 
-                if (this.LIsPair)
+                if (Left.IsPair)
                 {
-                    didSplit = this.LeftPair.Split();
+                    didSplit = Left.P.Split();
                 }
-                else if (LeftValue > MaxValue)
+                else if (Left.Value > MaxValue)
                 {
-                    this.LIsPair = true;
-                    this.LeftPair = CreateSplit(LeftValue);
+                    Left = new Element(CreateSplit(Left.Value));
                     didSplit = true;
                     return didSplit;
                 }
 
                 if (!didSplit)
                 {
-                    if (this.RIsPair)
+                    if (Right.IsPair)
                     {
-                        didSplit = this.RightPair.Split();
+                        didSplit = Right.P.Split();
                     }
-                    else if (RightValue > MaxValue)
+                    else if (Right.Value > MaxValue)
                     {
-                        this.RIsPair = true;
-                        this.RightPair = CreateSplit(RightValue);
+                        Right = new Element(CreateSplit(Right.Value));
                         didSplit = true;
                         return didSplit;
                     }
@@ -242,42 +257,14 @@ namespace AdventOfCode.Y2021
                 return didSplit;
             }
 
-            private Pair CreateSplit(int i)
-            {
-                return new Pair(i / 2, i / 2 + i % 2);
-            }
-
-            private int FindCenterComma(string line)
-            {
-                int index = 1;
-                int openCount = 0;
-
-                do
-                {
-                    if (line[index] == Open)
-                        openCount++;
-                    else if (line[index] == Close)
-                        openCount--;
-                    index++;
-                } while (openCount > 0);
-
-                return index;
-            }
+            private Pair CreateSplit(int i) => new Pair(i / 2, i / 2 + i % 2);
 
             public long Magnitude()
             {
                 long left, right;
-                left = right = 0;
 
-                if (this.LIsPair)
-                    left = LeftPair.Magnitude();
-                else
-                    left = LeftValue;
-
-                if (this.RIsPair)
-                    right = RightPair.Magnitude();
-                else
-                    right = RightValue;
+                left = (Left.IsValue) ? Left.Value : Left.P.Magnitude();
+                right = (Right.IsValue) ? Right.Value : Right.P.Magnitude();
 
                 return (3 * left) + (2 * right);
             }
