@@ -51,9 +51,7 @@ namespace AdventOfCode.Y2021
 
                 // line[0] == Open by definition
                 if (line[1] == Open)
-                {
                     LeftIsPair = true;
-                }
                 else
                 {
                     LeftIsPair = false;
@@ -63,9 +61,7 @@ namespace AdventOfCode.Y2021
 
                 // line[Len - 1] == Close by definition
                 if (line[line.Length - 2] == Close)
-                {
                     RightIsPair = true;
-                }
                 else
                 {
                     RightIsPair = false;
@@ -294,7 +290,7 @@ namespace AdventOfCode.Y2021
             return sum.Magnitude().ToString();
         }
 
-        [Description("What is the magnitude of the final sum?")]
+        [Description("What is the largest magnitude of any sum of two different snailfish numbers from the homework assignment?")]
         public override string SolvePart2()
         {
             long maxMagnitude = 0;

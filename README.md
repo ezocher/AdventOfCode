@@ -33,6 +33,8 @@ https://adventofcode.com/
 |14|Dictionary<string/char, numeric>, StringBuilder|Matching, counting||
 |15|2D Arrays, Queue|Finding shortest path||
 |16|Bit array, Operator & operands class|Decoding bit-based protocol, simple operator evaluation||
+|17|Integer points|Brute force trials with calculated bounds||
+|18|Binary tree|Applying rules to trees recursively||
 
 
 

@@ -8,11 +8,13 @@ namespace AdventOfCode
     {
         public static void Main()
         {
+            // Runner.AdventYear(2021, 99, true); return;
+
             // Run all solutions or run solutions for a specific year
             // Runner.AdventYear(2021); return;
 
             const int Year = 2021;
-            const int Day = 17;
+            const int Day = 18;
             const bool Solved = true;
 
             // Before puzzle release:
