@@ -152,5 +152,9 @@ namespace AdventOfCode.Core
             else
                 dict.Add(key, increment);
         }
+
+        public static int CountTrue(bool[] array) => array.Count(c => c == true);
+
+        public static int CountFalse(bool[] array) => array.Count(c => c == false);
     }
 }
