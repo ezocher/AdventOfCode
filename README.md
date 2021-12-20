@@ -35,6 +35,7 @@ https://adventofcode.com/
 |16|Bit array, Operator & operands class|Decoding bit-based protocol, simple operator evaluation||
 |17|Integer points|Brute force trials with calculated bounds||
 |18|Binary tree|Applying rules to trees recursively||
+|20|Bi-level image (CharImage)|Simple image processing||
 
 
 
