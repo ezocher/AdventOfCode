@@ -18,9 +18,36 @@ namespace AdventOfCode.Common
 
         public CharImage(List<string> lines, int startingLineIndex, int width, int height)
         {
-            this.Width = width;
-            this.Height = height;
+            Width = width;
+            Height = height;
             Data = Parse.CharArray(lines, startingLineIndex, width, height);
+        }
+
+        public CharImage(int pad, char padChar, List<string> lines, int startingLineIndex, int size)
+        {
+            Width = size + (2 * pad);
+            Height = size + (2 * pad);
+
+            Data = new char[Height, Width];
+
+            for (int row = 0; row < pad; row++)
+                for (int column = 0; column < Width; column++)
+                    Data[row, column] = padChar;
+
+            for (int row = pad; row < (size + pad); row++)
+                for (int column = 0; column < Width; column++)
+                {
+                    char nextChar;
+                    if ((column < pad) || (column >= (Width - pad)))
+                        nextChar = padChar;
+                    else
+                        nextChar = lines[startingLineIndex + (row - pad)][column - pad];
+                    Data[row, column] = nextChar;
+                }
+
+            for (int row = size + pad; row < Height; row++)
+                for (int column = 0; column < Width; column++)
+                    Data[row, column] = padChar;
         }
 
         public CharImage(int width, int height, char value = ' ')
@@ -73,6 +100,35 @@ namespace AdventOfCode.Common
             for (int row = 0; row < Height; row++)
                 for (int column = 0; column < Width; column++)
                     Data[row, column] = (char)fillValue++;
+        }
+
+        public void SetBorder(int border, char setChar)
+        {
+            for (int row = 0; row < border; row++)
+                for (int column = 0; column < Width; column++)
+                    Data[row, column] = setChar;
+
+            for (int row = 0; row < Height; row++)
+                for (int column = 0; column < border; column++)
+                    Data[row, column] = setChar;
+
+            for (int row = 0; row < Height; row++)
+                for (int column = Width - border; column < Width; column++)
+                    Data[row, column] = setChar;
+
+            for (int row = Height - border; row < Height; row++)
+                for (int column = 0; column < Width; column++)
+                    Data[row, column] = setChar;
+        }
+
+        public int CountChar(char target)
+        {
+            int count = 0;
+            for (int row = 0; row < Height; row++)
+                for (int column = 0; column < Width; column++)
+                    if (Data[row, column] == target) count++;
+
+            return count;
         }
 
         public void Write()
