@@ -12,7 +12,7 @@ https://adventofcode.com/
 ### Puzzles Completed
 | Year | Stars | Completed |
 | ---- | ----- | --------- |
-| 2021 | 39 :star: (AoC++)| 1-18, 20, 21.1 |
+| 2021 | 40 :star: (AoC++)| 1-18, 20-21 |
 
 ### Superlatives
 | | | |
@@ -24,7 +24,7 @@ https://adventofcode.com/
 | Hardest Puzzle | 2021 Puzzle 18 Part 1 | 11148th in 17:52:36 (about 5 hrs. of work) |
 
 ### Data Structures/Algorithms Used
-| Puzzle | DS/Classes|Algorithms | Notes |
+| Puzzle | DS/Classes | Algorithms | Notes |
 |-|-|-|-|
 |10|Espression stack|Expression parsing w/ errors||
 |11|2D Int Array|Game of Life-ish||
@@ -36,6 +36,7 @@ https://adventofcode.com/
 |17|Integer points|Brute force trials with calculated bounds||
 |18|Binary tree|Applying rules to trees recursively||
 |20|Bi-level image (CharImage)|Simple image processing||
+|21|Weighted game tree|Recursive tree building and traversal||
 
 
 
