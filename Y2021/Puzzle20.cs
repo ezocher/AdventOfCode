@@ -63,13 +63,13 @@ namespace AdventOfCode.Y2021
             CharImage src = image;
             CharImage dest = null;
 
-            if (verbose) { Console.WriteLine($"\n----- Input Image -----"); src.Write(); }
+            if (verbose) { Console.Write($"\n----- Input Image -----"); src.Write(); }
 
             for (int pass = 1; pass <= passes; pass++)
             {
                 dest = Filter(src, imageEnhancementMap);
                 src = dest;
-                if (verbose) { Console.WriteLine($"\n----- Pass #{pass} -----"); dest.Write(); }
+                if (verbose) { Console.Write($"\n----- Pass #{pass} -----"); dest.Write(); }
             }
             return dest;
         }
@@ -78,7 +78,9 @@ namespace AdventOfCode.Y2021
         public override string SolvePart1()
         {
             const int EnhancementIterations = 2;
-            const int Pad = EnhancementIterations * 2 + 5;
+
+            // Pad x 2 avoids artifacts creeping in from border reaching the expanded original image
+            const int Pad = EnhancementIterations * 2 + 5;      
 
             image = new CharImage(Pad, ZeroChar, lines, 2, lines[2].Length);
 
@@ -92,6 +94,8 @@ namespace AdventOfCode.Y2021
         public override string SolvePart2()
         {
             const int EnhancementIterations = 50;
+
+            // Pad x 2 avoids artifacts creeping in from border reaching the expanded original image
             const int Pad = EnhancementIterations * 2 + 5;
 
             image = new CharImage(Pad, ZeroChar, lines, 2, lines[2].Length);
