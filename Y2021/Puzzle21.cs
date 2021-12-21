@@ -10,7 +10,7 @@ namespace AdventOfCode.Y2021
     {
         private const short BoardSpaces = 10;
 
-        // ========== Part 1 ==========
+        #region Part1
         private Player player1, player2;
         private Die die;
 
@@ -61,8 +61,9 @@ namespace AdventOfCode.Y2021
                 return roll;
             }
         }
+        #endregion
 
-        // ========== Part 2 ==========
+        #region Part 2
         private const short NumOutcomes3Rolls = 27;
         private const short PossibleTotals3Rolls = 7;
         private const short LowestTotal3Rolls = 3;
@@ -136,27 +137,24 @@ namespace AdventOfCode.Y2021
             public (long, long) CountWins(long numberOfOutcomes)
             {
                 if (Win)
-                {
-                    if (Score1 >= WinningScore)
-                        return (numberOfOutcomes, 0);
-                    else
+                    if (Score1 >= WinningScore) 
+                        return (numberOfOutcomes, 0); 
+                    else 
                         return (0, numberOfOutcomes);
-                }
-                else
-                {
-                    long totalWins1 = 0;
-                    long totalWins2 = 0;
 
-                    for (short i = 0; i < PossibleTotals3Rolls; i++)
-                    {
-                        (long wins1, long wins2) = NextTurn[i].CountWins(numberOfOutcomes * OutcomeCounts[i]);
-                        totalWins1 += wins1;
-                        totalWins2 += wins2;
-                    }
-                    return (totalWins1, totalWins2);
+                long totalWins1 = 0;
+                long totalWins2 = 0;
+
+                for (short i = 0; i < PossibleTotals3Rolls; i++)
+                {
+                    (long wins1, long wins2) = NextTurn[i].CountWins(numberOfOutcomes * OutcomeCounts[i]);
+                    totalWins1 += wins1;
+                    totalWins2 += wins2;
                 }
+                return (totalWins1, totalWins2);
             }
         }
+        #endregion
 
         public Puzzle21(string input) : base(input) { Name = "Dirac Dice"; }
 
