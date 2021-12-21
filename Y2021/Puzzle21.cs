@@ -8,9 +8,11 @@ namespace AdventOfCode.Y2021
 {
     public class Puzzle21 : ASolver
     {
+        private const short BoardSpaces = 10;
+
+        // ========== Part 1 ==========
         private Player player1, player2;
         private Die die;
-        private const short BoardSpaces = 10;
 
         private struct Player
         {
@@ -60,13 +62,12 @@ namespace AdventOfCode.Y2021
             }
         }
 
+        // ========== Part 2 ==========
         private const short NumOutcomes3Rolls = 27;
         private const short PossibleTotals3Rolls = 7;
         private const short LowestTotal3Rolls = 3;
         private const short HighestTotal3Rolls = 9;
         private static long[] OutcomeCounts = new long[] { 1, 3, 6, 7, 6, 3, 1 };
-
-        private static int numberOfGSNodes = 0;
 
         private static (short, short) Move(short pos, short score, short spaces)
         {
@@ -79,7 +80,7 @@ namespace AdventOfCode.Y2021
 
         private const int WinningScore = 21;
 
-        private class GameState
+        private struct GameState
         {
             public short Score1;
             public short Score2;
@@ -97,7 +98,6 @@ namespace AdventOfCode.Y2021
                 Player1Next = true;
                 Win = false;
                 NextTurn = null;
-                numberOfGSNodes++;
             }
 
             public GameState(GameState previous, short roll)
@@ -118,8 +118,6 @@ namespace AdventOfCode.Y2021
                 }
 
                 Player1Next = !previous.Player1Next;
-
-                numberOfGSNodes++;
             }
 
             public void BuildGameTree()
@@ -169,7 +167,6 @@ namespace AdventOfCode.Y2021
             int startingPositionIndex = "Player X starting position: ".Length;
             player1 = new Player(int.Parse(lines[0].Substring(startingPositionIndex)));
             player2 = new Player(int.Parse(lines[1].Substring(startingPositionIndex)));
-
             die = new();
         }
 
