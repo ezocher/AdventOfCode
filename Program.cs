@@ -14,8 +14,8 @@ namespace AdventOfCode
             // Runner.AdventYear(2021); return;
 
             const int Year = 2021;
-            const int Day = 20;
-            const bool Solved = true;
+            const int Day = 21;
+            const bool Solved = false;
 
             // Before puzzle release:
             // * Log in to AoC and verify/update session cookie (if necessary)
