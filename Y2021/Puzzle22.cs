@@ -17,8 +17,7 @@ namespace AdventOfCode.Y2021
 
             public IntRange(int low, int high)
             {
-                Low = low;
-                High = high;
+                Low = low; High = high;
             }
 
             public void Clamp()
@@ -67,9 +66,7 @@ namespace AdventOfCode.Y2021
 
             public void Clamp()
             {
-                X.Clamp();
-                Y.Clamp();
-                Z.Clamp();
+                X.Clamp(); Y.Clamp(); Z.Clamp();
             }
         }
 
@@ -90,10 +87,12 @@ namespace AdventOfCode.Y2021
         private int CountOnCuboidsPart1()
         {
             int count = 0;
+
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
                     for (int z = 0; z < Size; z++)
                         if (cuboids[x, y, z]) count++;
+
             return count;
         }
         #endregion
@@ -121,14 +120,8 @@ namespace AdventOfCode.Y2021
             public bool Surrounds(Extent3D inner) => (X.Contains(inner.X) && Y.Contains(inner.Y) && Z.Contains(inner.Z));
 
             // Create and return a new Extent of opposite value (vs the target) of the volume where the intersector intersects the target
-            public Extent3D Intersection(Extent3D target)
-            {
-                IntRange x, y, z;
-                x = X.Intersection(target.X);
-                y = Y.Intersection(target.Y);
-                z = Z.Intersection(target.Z);
-                return new Extent3D(x, y, z, target.Value * -1);
-            }
+            public Extent3D Intersection(Extent3D target) => new Extent3D(X.Intersection(target.X), Y.Intersection(target.Y), 
+                Z.Intersection(target.Z), target.Value * -1);
 
             public long CountCuboids() => (long)(X.High - X.Low + 1) * (Y.High - Y.Low + 1) * (Z.High - Z.Low + 1) * Value;
         }
