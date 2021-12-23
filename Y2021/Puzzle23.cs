@@ -9,8 +9,12 @@ namespace AdventOfCode.Y2021
     public partial class Puzzle23 : ASolver 
     {
         private GameState startingState;
-        private Dictionary<string, int> visitedStates;
         private Queue<GameState> gameStates;
+
+        private GameState2 startingState2;
+        private Queue<GameState2> gameStates2;
+
+        private Dictionary<string, int> visitedStates;
         private int lowestCost;
 
         public Puzzle23(string input) : base(input) { Name = "Amphipod"; }
@@ -18,14 +22,27 @@ namespace AdventOfCode.Y2021
         public override void Setup()
         {
             List<string> lines = Tools.GetLines(Input);
+            string[] Part2InsertedLines = new string[] { "  #D#C#B#A#", "  #D#B#A#C#" };
 
             startingState = new GameState(lines[2], lines[3]);
+            startingState2 = new GameState2(new string[] { lines[2], Part2InsertedLines[0], Part2InsertedLines[1], lines[3] });
+
+            gameStates = new();
+            gameStates.Enqueue(startingState);
+
+            gameStates2 = new();
+            gameStates2.Enqueue(startingState2);
 
             visitedStates = new();
             visitedStates.Add(startingState.ToMinString(), 0);
 
-            gameStates = new();
-            gameStates.Enqueue(startingState);
+            lowestCost = int.MaxValue;
+        }
+
+        private void SetupPart2(GameState2 startingState)
+        {
+            visitedStates = new();
+            visitedStates.Add(startingState.ToMinString(), 0);
 
             lowestCost = int.MaxValue;
         }
@@ -33,13 +50,10 @@ namespace AdventOfCode.Y2021
         [Description("What is the least energy required to organize the amphipods?")]
         public override string SolvePart1()
         {
-            int cycle = 0;
-            bool verbose = true;
             List<(int, int)> possibleMoves = null;
 
             while (gameStates.Count > 0)
             {
-                cycle++;
                 GameState gs = gameStates.Dequeue();
                 possibleMoves = gs.GetPossibleMoves();
                 
@@ -69,16 +83,15 @@ namespace AdventOfCode.Y2021
                         }
                     }
             }
-            if (verbose) Console.WriteLine($"Lowest cost = {lowestCost}, cycles = {cycle}, visited = {visitedStates.Count}, queued = {gameStates.Count}");
             return lowestCost.ToString();
         }
 
         [Description("What is the least energy required to organize the amphipods?")]
         public override string SolvePart2()
         {
-            Setup();    // Remove if Part 2 builds on output of Part 1
+            //SetupPart2(startingState2);
 
-            return string.Empty;
+            return lowestCost.ToString();
         }
     }
 }

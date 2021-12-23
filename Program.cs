@@ -14,8 +14,8 @@ namespace AdventOfCode
             // Runner.AdventYear(2021); return;
 
             const int Year = 2021;
-            const int Day = 22;
-            const bool Solved = true;
+            const int Day = 23;
+            const bool Solved = false;
 
             // Before puzzle release:
             // * Log in to AoC and verify/update session cookie (if necessary)
@@ -39,7 +39,7 @@ namespace AdventOfCode
 }
 
 
-// Put the lines below in a file "SessionCookie.cs" in the Secrets folder and customize with your personal session cookie
+// Put the lines below in a file "SessionCookie.cs" in the Core/Secrets folder and customize with your personal session cookie
 // The Secrets folder is in the .gitignore, so this file will not be published
 
 //namespace AdventOfCode
