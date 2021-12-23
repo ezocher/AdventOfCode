@@ -23,16 +23,12 @@ namespace AdventOfCode.Core
                 hGlobal = Marshal.AllocHGlobal(bytes);
 
                 if (hGlobal == default)
-                {
                     ThrowWin32();
-                }
 
                 var target = GlobalLock(hGlobal);
 
                 if (target == default)
-                {
                     ThrowWin32();
-                }
 
                 try
                 {
@@ -44,18 +40,14 @@ namespace AdventOfCode.Core
                 }
 
                 if (SetClipboardData(cfUnicodeText, hGlobal) == default)
-                {
                     ThrowWin32();
-                }
 
                 hGlobal = default;
             }
             finally
             {
                 if (hGlobal != default)
-                {
                     Marshal.FreeHGlobal(hGlobal);
-                }
 
                 CloseClipboard();
             }
@@ -67,14 +59,10 @@ namespace AdventOfCode.Core
             while (true)
             {
                 if (OpenClipboard(default))
-                {
                     break;
-                }
 
                 if (--num == 0)
-                {
                     ThrowWin32();
-                }
 
                 Thread.Sleep(100);
             }
@@ -82,10 +70,7 @@ namespace AdventOfCode.Core
 
         const uint cfUnicodeText = 13;
 
-        static void ThrowWin32()
-        {
-            throw new Win32Exception(Marshal.GetLastWin32Error());
-        }
+        static void ThrowWin32() => throw new Win32Exception(Marshal.GetLastWin32Error());
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern IntPtr GlobalLock(IntPtr hMem);
