@@ -9,6 +9,10 @@ namespace AdventOfCode.Y2021
     public class Puzzle23 : ASolver 
     {
         private GameState startingState;
+        private HashSet<string> visitedStates;
+        private Queue<GameState> gameStates;
+        private int lowestCost;
+
         private struct Room
         {
             public char Top;
@@ -18,8 +22,8 @@ namespace AdventOfCode.Y2021
             {
                 Top = top; Bottom = bottom;
             }
-        }
 
+        }
 
         private class GameState
         {
@@ -35,6 +39,7 @@ namespace AdventOfCode.Y2021
 
             char[] Hall;
             Room[] Rooms;
+            public int CumulativeCost;
 
             public GameState(string topLine, string bottomLine)
             {
@@ -47,9 +52,17 @@ namespace AdventOfCode.Y2021
                 string[] bottoms = bottomLine.Split(new char[] { ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < NumRooms; i++)
                     Rooms[i] = new Room(tops[i][0], bottoms[i][0]);
+                CumulativeCost = 0;
             }
 
-            public int Move(int from, int to)
+            public GameState(GameState gs)
+            {
+                Array.Copy(gs.Hall, Hall, HallSlots);
+                Array.Copy(gs.Rooms, Rooms, NumRooms);
+                CumulativeCost = gs.CumulativeCost;
+            }
+
+            public bool Move(int from, int to)
             {
                 char moving = GetSlot(from);
 
@@ -63,7 +76,9 @@ namespace AdventOfCode.Y2021
                 SetSlot(to, moving);
                 SetSlot(from, EmptySlot);
 
-                return SpacesMoved(from, to) * CostPerSpace(moving);
+                CumulativeCost += SpacesMoved(from, to) * CostPerSpace(moving);
+
+                return Solved();
             }
 
             public int CostPerSpace(char c) => MoveCost[c - Amber];
@@ -120,6 +135,17 @@ namespace AdventOfCode.Y2021
                     return (slot % 2 == 0);
             }
 
+            public string MinString()
+            {
+                char[] roomChars = new char[NumRooms * 2];
+                for (int i = 0; i < NumRooms; i++)
+                {
+                    roomChars[i] = Rooms[i].Top;
+                    roomChars[i + 4] = Rooms[i].Bottom;
+                }
+                return new string(Hall) + new string(roomChars);
+            }
+
             public override string ToString()
             {
                 return "#############\n" +
@@ -129,6 +155,60 @@ namespace AdventOfCode.Y2021
                         "  #########";
             }
 
+            public bool Solved()
+            {
+                for (int i = 0; i < HallSlots; i++)
+                    if (Hall[i] != EmptySlot)
+                        return false;
+
+                for (int i = 0; i < NumRooms; i++)
+                    if ((Rooms[i].Top != (char)(Amber + i)) || (Rooms[i].Bottom != (char)(Amber + i)))
+                        return false;
+
+                return true;
+            }
+
+            // Find and return all legal moves from the current GameState
+            public List<(int, int)> GetPossibleMoves()
+            {
+                List<(int, int)> possibleMoves = new();
+
+                // Possible moves from hall to destination room
+                for (int i = 0; i < HallSlots; i++)
+                    if (Hall[i] != EmptySlot)
+                    {
+                        int destRoom = (int)(Hall[i] - Amber);
+                        int availableSlot = RoomAvailableForMove(destRoom);
+                        if ((availableSlot > RoomUnavailable) && (HallIsUnblocked(i, destRoom)))
+                            possibleMoves.Add((i, availableSlot));
+                    }
+
+                // Possible moves from topmost full slot of room to destination room or hall
+                for (int roomIndex = 0; roomIndex < length; roomIndex++)
+                {
+
+                }
+
+
+                return possibleMoves;
+            }
+
+            const int RoomUnavailable = -1;
+            // Returns index of slot if available
+            public int RoomAvailableForMove(int roomIndex)
+            {
+                if ((Rooms[roomIndex].Top != EmptySlot) || (Rooms[roomIndex].Bottom != (char)(Amber + roomIndex)))
+                    return RoomUnavailable;
+                else if (Rooms[roomIndex].Bottom == EmptySlot)
+                    return roomIndex * 2 + HallSlots + 1;
+                else
+                    return roomIndex * 2 + HallSlots;
+            }
+
+            public bool HallIsUnblocked(int from, int destRoomIndex)
+            {
+                return true;
+            }
         }
 
         public Puzzle23(string input) : base(input) { Name = "Amphipod"; }
@@ -138,24 +218,48 @@ namespace AdventOfCode.Y2021
             List<string> lines = Tools.GetLines(Input);
 
             startingState = new GameState(lines[2], lines[3]);
-            Console.WriteLine();
-            Console.WriteLine(startingState);
-            Console.WriteLine($"Move cost = {startingState.Move(11, 2)}");
-            Console.WriteLine(startingState);
-            Console.WriteLine($"Move cost = {startingState.Move(9, 11)}");
-            Console.WriteLine(startingState);
-            Console.WriteLine($"Move cost = {startingState.Move(10, 3)}");
-            Console.WriteLine(startingState);
-            Console.WriteLine($"Move cost = {startingState.Move(2, 10)}");
-            Console.WriteLine(startingState);
-            Console.WriteLine($"Move cost = {startingState.Move(7, 9)}");
-            Console.WriteLine(startingState);
+
+            visitedStates = new();
+            visitedStates.Add(startingState.MinString());
+
+            gameStates = new();
+            gameStates.Enqueue(startingState);
+
+            lowestCost = int.MaxValue;
         }
 
         [Description("What is the least energy required to organize the amphipods?")]
         public override string SolvePart1()
         {
-            return string.Empty;
+            List<(int, int)> possibleMoves = null;
+
+            while (gameStates.Count > 0)
+            {
+                GameState gs = gameStates.Dequeue();
+                possibleMoves = gs.GetPossibleMoves();
+                
+                // If a GameState has no legal moves it will return a zero lenght possible moves
+                if (possibleMoves.Count > 0)
+                    foreach ((int from, int to) in possibleMoves)
+                    {
+                        GameState nextMove = new GameState(gs);
+                        bool solved = nextMove.Move(from, to);
+                        if (!visitedStates.Contains(nextMove.MinString()))
+                        {
+                            visitedStates.Add(nextMove.MinString());
+                            if (solved)
+                            {
+                                if (nextMove.CumulativeCost < lowestCost)
+                                    lowestCost = nextMove.CumulativeCost;
+                            }
+                            else
+                            {
+                                gameStates.Enqueue(nextMove);
+                            }
+                        }
+                    }
+            }
+            return lowestCost.ToString();
         }
 
         [Description("What is the least energy required to organize the amphipods?")]
