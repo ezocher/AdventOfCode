@@ -9,17 +9,26 @@ namespace AdventOfCode.Y2021
 {
     public partial class Puzzle23 : ASolver
     {
-        private struct Room2
+        private class Room2
         {
-            public char Top;
-            public char Bottom;
+            public const int RoomSize = 4;
 
-            public Room2(char top, char bottom)
+            // Top is index 0
+            public char[] Slots;
+
+            public Room2(char[] contents)
             {
-                Top = top; Bottom = bottom;
+                Slots = new char[RoomSize];
+                for (int i = 0; i < RoomSize; i++)
+                    Slots[i] = contents[i];
+            }
+            public Room2()
+            {
+                Slots = new char[RoomSize];
             }
         }
 
+        // TODO: Remove Done/Unchanged/New comments from refactoring work
         private class GameState2
         {
             public const int HallSlots = 7;
@@ -36,38 +45,47 @@ namespace AdventOfCode.Y2021
             Room2[] Rooms;
             public int CumulativeCost;
 
-            public GameState2(string[] lines)
+            public GameState2(string[] lines) // Done
             {
                 Hall = new char[HallSlots];
                 for (int i = 0; i < HallSlots; i++)
                     Hall[i] = EmptySlot;
 
-                //Rooms = new Room2[NumRooms];
-                //string[] tops = topLine.Split(new char[] { ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
-                //string[] bottoms = bottomLine.Split(new char[] { ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
-                //for (int i = 0; i < NumRooms; i++)
-                //{
-                //    Rooms[i] = new Room2(tops[i][0], bottoms[i][0]);
-                //    if (InDestinationRoom(i, Rooms[i].Bottom))
-                //    {
-                //        Rooms[i].Bottom = CompletedSlot;
-                //        if (InDestinationRoom(i, Rooms[i].Top))
-                //            Rooms[i].Top = CompletedSlot;
-                //    }
-                //}
+                Rooms = new Room2[NumRooms];
+                List<string[]> splitLines = new();
+                foreach (string line in lines)
+                    splitLines.Add(line.Split(new char[] { ' ', '#' }, StringSplitOptions.RemoveEmptyEntries));
+
+                for (int room = 0; room < NumRooms; room++)
+                {
+                    Rooms[room] = new Room2(new char[] { splitLines[0][room][0], splitLines[1][room][0], splitLines[2][room][0], splitLines[3][room][0] });
+
+                    for (int slot = Room2.RoomSize - 1; slot >= 0; slot--)
+                    {
+                        if (InDestinationRoom(room, Rooms[room].Slots[slot]))
+                            Rooms[room].Slots[slot] = CompletedSlot;
+                        else
+                            break;
+                    }
+                }
+
                 CumulativeCost = 0;
             }
 
-            public GameState2(GameState2 gs)
+            public GameState2(GameState2 gs) // Done
             {
                 Hall = new char[HallSlots];
                 Rooms = new Room2[NumRooms];
                 Array.Copy(gs.Hall, Hall, HallSlots);
-                Array.Copy(gs.Rooms, Rooms, NumRooms);
+                for (int room = 0; room < NumRooms; room++)
+                {
+                    Rooms[room] = new();
+                    Array.Copy(gs.Rooms[room].Slots, Rooms[room].Slots, Room2.RoomSize);
+                }
                 CumulativeCost = gs.CumulativeCost;
             }
 
-            public bool Move(int from, int to)
+            public bool Move(int from, int to) // Done
             {
                 char pieceMoving = GetSlotContent(from);
 
@@ -82,11 +100,11 @@ namespace AdventOfCode.Y2021
 
                 SetSlotContent(from, EmptySlot);
 
-                if (IsRoomSlot(to) && (RoomIndexOf(pieceMoving) == RoomIndexOf(to)))
+                if (IsRoomSlot(to))
                 {
+                    if (RoomIndexOf(pieceMoving) != RoomIndexOf(to))
+                        throw new ArgumentException("Move attempted to non-matching destination room", $"{from} -> {to}");
                     pieceMoving = CompletedSlot;
-                    if (IsTopSlot(to) && (GetSlotContent(to + 1) != CompletedSlot))
-                        throw new ArgumentException("Move attempted to destination room with non-dest piece underneath", $"{from} -> {to}");
                 }
 
                 SetSlotContent(to, pieceMoving);
@@ -94,12 +112,12 @@ namespace AdventOfCode.Y2021
                 return Solved();
             }
 
-            public int CostPerSpace(char c) => MoveCost[c - Amber];
+            public int CostPerSpace(char c) => MoveCost[c - Amber]; // Unchanged
 
-            public int SpacesMoved(int from, int to)
+            public int SpacesMoved(int from, int to) // Done
             {
                 int spaces = 0;
-                if (!IsHallSlot(from) && !IsHallSlot(to))
+                if (IsRoomSlot(from) && IsRoomSlot(to))
                 {
                     int roomsMoved = Math.Abs(RoomIndexOf(from) - RoomIndexOf(to));
                     spaces = (roomsMoved * 2) + 2;
@@ -111,69 +129,83 @@ namespace AdventOfCode.Y2021
                     spaces = MoveSpaces[roomIndex, hallIndex];
                 }
 
-                if (IsBottomSlot(from)) spaces++;
-                if (IsBottomSlot(to)) spaces++;
-
+                if (IsRoomSlot(from))
+                    spaces += RoomSlotIndexOf(from);
+                if (IsRoomSlot(to))
+                    spaces += RoomSlotIndexOf(to);
                 return spaces;
             }
 
-            public char GetSlotContent(int slot)
+            public char GetSlotContent(int slot) // Done
             {
                 if (slot < HallSlots)
                     return Hall[slot];
                 else
                 {
-                    int room = RoomIndexOf(slot);
-                    return (slot % 2 == 1) ? Rooms[room].Top : Rooms[room].Bottom;
+                    (int room, int roomSlot) = RoomAndSlotIndex(slot);
+                    return Rooms[room].Slots[roomSlot];
                 }
             }
 
-            public void SetSlotContent(int slot, char c)
+            public void SetSlotContent(int slot, char c) // Done
             {
                 if (IsHallSlot(slot))
                     Hall[slot] = c;
-                else if (IsBottomSlot(slot))
-                    Rooms[RoomIndexOf(slot)].Bottom = c;
                 else
-                    Rooms[RoomIndexOf(slot)].Top = c;
+                {
+                    (int room, int roomSlot) = RoomAndSlotIndex(slot);
+                    Rooms[room].Slots[roomSlot] = c;
+                }
             }
 
-            public string ToMinString()
+            public string ToMinString() // Done
             {
-                char[] roomChars = new char[NumRooms * 2];
-                for (int i = 0; i < NumRooms; i++)
-                {
-                    roomChars[i] = Rooms[i].Top;
-                    roomChars[i + 4] = Rooms[i].Bottom;
-                }
+                char[] roomChars = new char[NumRooms * Room2.RoomSize];
+                for (int room = 0; room < NumRooms; room++)
+                    for (int slot = 0; slot < Room2.RoomSize; slot++)
+                        roomChars[room + (slot * NumRooms)] = Rooms[room].Slots[slot];
+
                 return new string(Hall) + new string(roomChars);
             }
 
-            public override string ToString()
+            public override string ToString() //Done
             {
-                return $"#{Hall[0]}{Hall[1]}^{Hall[2]}^{Hall[3]}^{Hall[4]}^{Hall[5]}{Hall[6]}# | " +
-                       $"#{Rooms[0].Top}#{Rooms[1].Top}#{Rooms[2].Top}#{Rooms[3].Top}# | " +
-                       $"#{Rooms[0].Bottom}#{Rooms[1].Bottom}#{Rooms[2].Bottom}#{Rooms[3].Bottom}#";
+                string first2Lines =
+                    $"#{Hall[0]}{Hall[1]}^{Hall[2]}^{Hall[3]}^{Hall[4]}^{Hall[5]}{Hall[6]}# | " +
+                    $"#{Rooms[0].Slots[0]}#{Rooms[1].Slots[0]}#{Rooms[2].Slots[0]}#{Rooms[3].Slots[0]}# |";
+
+                string roomLines = "";
+                for (int slot = 1; slot < Room2.RoomSize; slot++)
+                    roomLines += $"#{Rooms[0].Slots[slot]}#{Rooms[1].Slots[slot]}#{Rooms[2].Slots[slot]}#{Rooms[3].Slots[slot]}# | ";
+
+                return first2Lines + roomLines;
             }
 
-            public string ToWriteString()
+            public string ToWriteString() // Done
             {
-                return "#############\n" +
+                string first3Lines = "#############\n" +
                        $"#{Hall[0]}{Hall[1]}.{Hall[2]}.{Hall[3]}.{Hall[4]}.{Hall[5]}{Hall[6]}#\n" +
-                       $"###{Rooms[0].Top}#{Rooms[1].Top}#{Rooms[2].Top}#{Rooms[3].Top}###\n" +
-                       $"  #{Rooms[0].Bottom}#{Rooms[1].Bottom}#{Rooms[2].Bottom}#{Rooms[3].Bottom}#\n" +
-                        "  #########";
+                       $"###{Rooms[0].Slots[0]}#{Rooms[1].Slots[0]}#{Rooms[2].Slots[0]}#{Rooms[3].Slots[0]}###\n";
+
+                string roomLines = "";
+                for (int slot = 1; slot < Room2.RoomSize; slot++)
+                    roomLines += $"  #{Rooms[0].Slots[slot]}#{Rooms[1].Slots[slot]}#{Rooms[2].Slots[slot]}#{Rooms[3].Slots[slot]}#\n";
+
+                return first3Lines + roomLines + "  #########\n";
             }
-            public bool Solved()
+
+            public bool Solved() //Done
             {
-                for (int i = 0; i < NumRooms; i++)
-                    if ((Rooms[i].Top != CompletedSlot) || (Rooms[i].Bottom != CompletedSlot))
-                        return false;
+                for (int room = 0; room < NumRooms; room++)
+                    for (int slot = 0; slot < Room2.RoomSize; slot++)
+                        if (Rooms[room].Slots[slot] != CompletedSlot)
+                            return false;
+
                 return true;
             }
 
             // Find and return all legal moves from the current GameState
-            public List<(int, int)> GetPossibleMoves()
+            public List<(int, int)> GetPossibleMoves() // Done
             {
                 List<(int, int)> possibleMoves = new();
 
@@ -215,7 +247,7 @@ namespace AdventOfCode.Y2021
                 return possibleMoves;
             }
 
-            public List<int> AvailableReachableHallSlots(int roomIndex)
+            public List<int> AvailableReachableHallSlots(int roomIndex) // Unchanged
             {
                 List<int> availSlots = new();
                 int roomRelative = roomIndex + 1;
@@ -238,46 +270,64 @@ namespace AdventOfCode.Y2021
 
                 return availSlots;
             }
-            public bool RoomIsSolved(int roomIndex) => (Rooms[roomIndex].Top == CompletedSlot) && (Rooms[roomIndex].Bottom == CompletedSlot);
-            public bool InDestinationRoom(int roomIndex, char c) => (RoomIndexOf(c) == roomIndex);
-            public static int RoomIndexOf(char c) => (int)(c - Amber);
-            public static int RoomIndexOf(int slotNumber) => (slotNumber - HallSlots) / 2;
-            public static bool IsHallSlot(int slotNumber) => (slotNumber < HallSlots);
-            public static bool IsRoomSlot(int slotNumber) => (slotNumber >= HallSlots);
-            public static bool IsBottomSlot(int slotNumber) => IsRoomSlot(slotNumber) && (slotNumber % 2 == 0);
-            public static bool IsTopSlot(int slotNumber) => IsRoomSlot(slotNumber) && (slotNumber % 2 == 1);
-            public int TopSlotNumber(int roomIndex) => roomIndex * 2 + HallSlots;
-            public int BottomSlotNumber(int roomIndex) => roomIndex * 2 + HallSlots + 1;
+
+            public static (int, int) RoomAndSlotIndex(int slotNumber) => (RoomIndexOf(slotNumber), RoomSlotIndexOf(slotNumber)); // New
+
+            public static int RoomSlotIndexOf(int slotNumber) => slotNumber - HallSlots - (RoomIndexOf(slotNumber) * Room2.RoomSize); // New
+
+            public bool RoomIsSolved(int roomIndex) // Done
+            {
+                for (int slot = 0; slot < Room2.RoomSize; slot++)
+                    if (Rooms[roomIndex].Slots[slot] != CompletedSlot)
+                        return false;
+
+                return true;
+            }
+            public bool InDestinationRoom(int roomIndex, char c) => (RoomIndexOf(c) == roomIndex); // Done
+            public static int RoomIndexOf(char c) => (int)(c - Amber);  // Done
+            public static int RoomIndexOf(int slotNumber) => (slotNumber - HallSlots) / Room2.RoomSize; // Done
+            
+            public static bool IsHallSlot(int slotNumber) => (slotNumber < HallSlots);  // Done
+            public static bool IsRoomSlot(int slotNumber) => (slotNumber >= HallSlots); // Done
+
+            public static bool IsBottomSlot(int slotNumber) => IsRoomSlot(slotNumber) && (slotNumber % Room2.RoomSize == 2); // Done
+            public static bool IsTopSlot(int slotNumber) => IsRoomSlot(slotNumber) && (slotNumber % Room2.RoomSize == 3); // Done
+            public int TopSlotNumber(int roomIndex) => roomIndex * Room2.RoomSize + HallSlots; //Done
+            public int BottomSlotNumber(int roomIndex) => roomIndex * Room2.RoomSize + HallSlots + 3; //Done
 
             const int RoomEmpty = -1;
-            public int TopFilledSlot(int roomIndex)
+            public int TopFilledSlot(int roomIndex) //Done
             {
-                if (Rooms[roomIndex].Top != EmptySlot)
-                    return TopSlotNumber(roomIndex);
-                else if (Rooms[roomIndex].Bottom != EmptySlot)
-                    return BottomSlotNumber(roomIndex);
-                else
-                    return RoomEmpty;
+                int topSlotIndex = TopSlotNumber(roomIndex);
+
+                for (int i = 0; i < Room2.RoomSize; i++)
+                {
+                    if (Rooms[roomIndex].Slots[i] != EmptySlot)
+                        return topSlotIndex + i;
+                }
+                return RoomEmpty;
             }
 
             const int RoomUnavailable = -1;
             // Returns index of slot if available
-            public int RoomAvailableForMove(int roomIndex)
+            public int RoomAvailableForMove(int roomIndex)  // Done
             {
-                if (Rooms[roomIndex].Top == EmptySlot)
+                int topFilledSlot = TopFilledSlot(roomIndex);
+
+                if (topFilledSlot == RoomEmpty)
+                    return BottomSlotNumber(roomIndex);
+                else if (topFilledSlot == TopSlotNumber(roomIndex))
+                    return RoomUnavailable;
+
+                for (int i = topFilledSlot; i <= BottomSlotNumber(roomIndex); i ++)
                 {
-                    if (Rooms[roomIndex].Bottom == EmptySlot)
-                        return BottomSlotNumber(roomIndex);
-                    else if (Rooms[roomIndex].Bottom == CompletedSlot)
-                        return TopSlotNumber(roomIndex);
-                    else
+                    if (GetSlotContent(i) != CompletedSlot)
                         return RoomUnavailable;
                 }
-                else // Top full
-                    return RoomUnavailable;
+                return topFilledSlot - 1;
             }
 
-            public bool PathIsUnblocked(int from, int destRoomIndex)
+            public bool PathIsUnblocked(int from, int destRoomIndex)  // Unchanged
             {
                 if (IsRoomSlot(from))
                 {

@@ -99,7 +99,7 @@ namespace AdventOfCode.Y2021
             public int SpacesMoved(int from, int to)
             {
                 int spaces = 0;
-                if (!IsHallSlot(from) && !IsHallSlot(to))
+                if (IsRoomSlot(from) && IsRoomSlot(to))
                 {
                     int roomsMoved = Math.Abs(RoomIndexOf(from) - RoomIndexOf(to));
                     spaces = (roomsMoved * 2) + 2;
