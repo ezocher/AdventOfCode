@@ -8,7 +8,7 @@ namespace AdventOfCode.Y2021
 {
     public class Puzzle24 : ASolver 
     {
-        // TODO private Program[] programs;
+        private Program[] programs;
 
         private List<Instruction> program;
 
@@ -115,6 +115,12 @@ namespace AdventOfCode.Y2021
                 Reset();
             }
 
+            public ALU(ALU alu)
+            {
+                Registers = new long[NumRegisters];
+                Array.Copy(alu.Registers, Registers, NumRegisters);
+            }
+
             private void Reset()
             {
                 for (int i = 0; i < NumRegisters; i++)
@@ -169,15 +175,19 @@ namespace AdventOfCode.Y2021
             public static int RegisterIndexOf(char c) => (int)c - FirstRegisterName;
             public static char RegisterNameOf(int i) => (char)(i + FirstRegisterName);
         }
+        
         public Puzzle24(string input) : base(input) { Name = "Arithmetic Logic Unit"; }
 
+        const int NumInputDigits = 14;
         public override void Setup()
         {
-            // TODO: Break the progaram into sub-programs starting with each inp statement
+            // TODO: Break the program into sub-programs starting with each inp statement
             // Run each sub-program on inputs of 1-9 and look at ALU state
             List<string> lines = Tools.GetLines(Input);
 
-            program = new();
+            programs = new Program[NumInputDigits];
+            int inputStatementNumber = 0;
+
             foreach (string line in lines)
             {
                 Instruction instruction = new Instruction(line);
