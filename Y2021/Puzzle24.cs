@@ -8,11 +8,25 @@ namespace AdventOfCode.Y2021
 {
     public class Puzzle24 : ASolver 
     {
+        // TODO private Program[] programs;
+
         private List<Instruction> program;
 
+        private class Program
+        {
+            public List<Instruction> Instructions;
+
+            public Program(List<Instruction> instructions)
+            {
+                Instructions = instructions;
+            }
+        }
+
+        // Added new "set" instruction to replace mul 0 instructions
         private class Instruction
         {
             public const int OperandIsLiteral = -1;
+            public static string Comment = "//";
 
             public string Operation;
             public int DestRegister;
@@ -21,10 +35,13 @@ namespace AdventOfCode.Y2021
 
             public Instruction(string line)
             {
-                string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = line.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
                 Operation = parts[0];
+                if (Operation == Comment)
+                    return;
+
                 DestRegister = ALU.RegisterIndexOf(parts[1][0]);
-                if (parts.Length > 2)
+                if (IsThreeOperandInstruction(Operation))
                 {
                     int literal = 0;
                     if (int.TryParse(parts[2], out literal))
@@ -37,16 +54,50 @@ namespace AdventOfCode.Y2021
                         SourceRegister = ALU.RegisterIndexOf(parts[2][0]);
                         SourceLiteral = 0;
                     }
+                    OptimizeMul0();
+                    OptimizeNoops();
+                }
+            }
+
+            // Change mul 0 instructions to set 0
+            private void OptimizeMul0()
+            {
+                if ((Operation == "mul") && (SourceRegister == OperandIsLiteral) && (SourceLiteral == 0))
+                    Operation = "set";
+            }
+
+            // Eliminate add 0, mul 1, div 1, and mod 1 instructions
+            private void OptimizeNoops()
+            {
+                if (SourceRegister == OperandIsLiteral)
+                {
+                    if (SourceLiteral == 0)
+                    {
+                        if (Operation == "add")
+                            Operation = Comment;
+                    }
+                    else if (SourceLiteral == 1)
+                    {
+                        if ((Operation == "mul") || (Operation == "div") || (Operation == "mod"))
+                            Operation = Comment;
+                    }          
                 }
             }
 
             public override string ToString()
             {
-                string instruction = $"{Operation} {ALU.RegisterNameOf(DestRegister)} ";
-                if (ALU.IsThreeOperandInstruction(Operation))
-                    instruction += (SourceRegister == OperandIsLiteral) ? SourceLiteral.ToString() : ALU.RegisterNameOf(SourceRegister).ToString();
-                return instruction;
+                if (Operation == Comment)
+                    return Comment;
+                else
+                {
+                    string instruction = $"{Operation} {ALU.RegisterNameOf(DestRegister)} ";
+                    if (IsThreeOperandInstruction(Operation))
+                        instruction += (SourceRegister == OperandIsLiteral) ? SourceLiteral.ToString() : ALU.RegisterNameOf(SourceRegister).ToString();
+                    return instruction;
+                }
             }
+
+            public static bool IsThreeOperandInstruction(string operation) => operation != "inp";
         }
 
         private class ALU
@@ -96,6 +147,9 @@ namespace AdventOfCode.Y2021
                         case "eql":
                             Registers[instruction.DestRegister] = (Registers[instruction.DestRegister] == SecondOperand(instruction)) ? 1 : 0;
                             break;
+                        case "set":
+                            Registers[instruction.DestRegister] = SecondOperand(instruction);
+                            break;
                         default:
                             throw new ArgumentException("Unknow operation", $"{instruction.Operation}");
                             break;
@@ -114,38 +168,45 @@ namespace AdventOfCode.Y2021
 
             public static int RegisterIndexOf(char c) => (int)c - FirstRegisterName;
             public static char RegisterNameOf(int i) => (char)(i + FirstRegisterName);
-            internal static bool IsThreeOperandInstruction(string operation) => operation != "inp";
-
-            //inp a - Read an input value and write it to variable a.
-            //add a b - Add the value of a to the value of b, then store the result in variable a.
-            //mul a b - Multiply the value of a by the value of b, then store the result in variable a.
-            //div a b - Divide the value of a by the value of b, truncate the result to an integer, then store the result in variable a. (Here, "truncate" means to round the value toward zero.)
-            //mod a b - Divide the value of a by the value of b, then store the remainder in variable a. (This is also called the modulo operation.)
-            //eql a b - If the value of a and b are equal, then store the value 1 in variable a.Otherwise, store the value 0 in variable a.
         }
         public Puzzle24(string input) : base(input) { Name = "Arithmetic Logic Unit"; }
 
         public override void Setup()
         {
+            // TODO: Break the progaram into sub-programs starting with each inp statement
+            // Run each sub-program on inputs of 1-9 and look at ALU state
             List<string> lines = Tools.GetLines(Input);
 
             program = new();
             foreach (string line in lines)
-                program.Add(new Instruction(line));
+            {
+                Instruction instruction = new Instruction(line);
+                if (instruction.Operation != Instruction.Comment)
+                    program.Add(instruction);
+            }
         }
 
         public long LargestValidSerialNumber()
         {
             const long ValidModelNumber = 0;
+            long smallestOuput = Int64.MaxValue;
             ALU alu = new();
 
+            // a solution (not largest) = 44671911181712
 
-            for (long i = 99999999999999; i >= 11111111111111; i--)
+            //for (long i = 99999999999999; i >= 11111111111111; i--)
+            for (long i = 49999999981712; i >= 11111111111111; i -= 100000)
+            // for (long i = 11111911181712; i <= 99999999999999; i += 1000000000)
             {
                 string candidateModelNum = i.ToString();
                 if (!candidateModelNum.Contains('0'))
                 {
                     long output = alu.Execute(program, candidateModelNum, 'z');
+                    if (Math.Abs(output) < smallestOuput)
+                    {
+                        Console.WriteLine($"new smallest = {output}, input = {i}");
+                        smallestOuput = Math.Abs(output);
+                    }
                     if (output == ValidModelNumber)
                         return i;
                 }
