@@ -34,7 +34,7 @@ namespace AdventOfCode.Y2021
             for (int row = 0; row < height; row++)
                 for (int col = 0; col < width; col++)
                     if (map.Data[row, col] == cuc)
-                        canMove[row, col] = (LookNext(row, col, deltaX, deltaY) != EmptySquare);
+                        canMove[row, col] = (LookNext(row, col, deltaX, deltaY) == EmptySquare);
         }
 
         private int MoveCucumberHerd(char cuc, int deltaX, int deltaY)
@@ -90,13 +90,13 @@ namespace AdventOfCode.Y2021
         [Description("What is the first step on which no sea cucumbers move?")]
         public override string SolvePart1()
         {
-            int step = 0;
+            int step = 1;
 
-            map.Write();
+            // map.Write();
             while (MoveCucumbers() > 0)
             {
                 step++;
-                map.Write();
+                // map.Write();
             }
 
             return step.ToString(); ;
