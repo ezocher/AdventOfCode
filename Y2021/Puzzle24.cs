@@ -3,22 +3,22 @@ using AdventOfCode.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 
 namespace AdventOfCode.Y2021
 {
     public class Puzzle24 : ASolver 
     {
+        private Program program;
         private Program[] programs;
-
-        private List<Instruction> program;
 
         private class Program
         {
             public List<Instruction> Instructions;
 
-            public Program(List<Instruction> instructions)
+            public Program()
             {
-                Instructions = instructions;
+                Instructions = new();
             }
         }
 
@@ -74,12 +74,12 @@ namespace AdventOfCode.Y2021
                     if (SourceLiteral == 0)
                     {
                         if (Operation == "add")
-                            Operation = Comment;
+                            Operation = "nop";
                     }
                     else if (SourceLiteral == 1)
                     {
                         if ((Operation == "mul") || (Operation == "div") || (Operation == "mod"))
-                            Operation = Comment;
+                            Operation = "nop";
                     }          
                 }
             }
@@ -98,6 +98,7 @@ namespace AdventOfCode.Y2021
             }
 
             public static bool IsThreeOperandInstruction(string operation) => operation != "inp";
+
         }
 
         private class ALU
@@ -108,6 +109,7 @@ namespace AdventOfCode.Y2021
 
             public long[] Registers;
             public int InputIndex;
+            public string CumulativeInput;
 
             public ALU()
             {
@@ -119,6 +121,8 @@ namespace AdventOfCode.Y2021
             {
                 Registers = new long[NumRegisters];
                 Array.Copy(alu.Registers, Registers, NumRegisters);
+                InputIndex = alu.InputIndex;
+                CumulativeInput = alu.CumulativeInput;
             }
 
             private void Reset()
@@ -126,12 +130,13 @@ namespace AdventOfCode.Y2021
                 for (int i = 0; i < NumRegisters; i++)
                     Registers[i] = InitialRegisterValue;
                 InputIndex = 0;
+                CumulativeInput = string.Empty;
             }
 
-            public long Execute(List<Instruction> program, string input, char outputRegister)
+            public long Execute(Program program, string input, char outputRegister)
             {
                 Reset();
-                foreach (Instruction instruction in program)
+                foreach (Instruction instruction in program.Instructions)
                 {
                     switch (instruction.Operation)
                     {
@@ -156,6 +161,8 @@ namespace AdventOfCode.Y2021
                         case "set":
                             Registers[instruction.DestRegister] = SecondOperand(instruction);
                             break;
+                        case "nop":
+                            break;
                         default:
                             throw new ArgumentException("Unknow operation", $"{instruction.Operation}");
                             break;
@@ -164,9 +171,48 @@ namespace AdventOfCode.Y2021
                 return Registers[RegisterIndexOf(outputRegister)];
             }
 
+            public ALU ExecuteOne(Program program, int input)
+            {
+                foreach (Instruction instruction in program.Instructions)
+                {
+                    switch (instruction.Operation)
+                    {
+                        case "inp":
+                            Registers[instruction.DestRegister] = input;
+                            InputIndex++;
+                            CumulativeInput += input.ToString();
+                            break;
+                        case "add":
+                            Registers[instruction.DestRegister] += SecondOperand(instruction);
+                            break;
+                        case "mul":
+                            Registers[instruction.DestRegister] *= SecondOperand(instruction);
+                            break;
+                        case "div":
+                            Registers[instruction.DestRegister] /= SecondOperand(instruction);
+                            break;
+                        case "mod":
+                            Registers[instruction.DestRegister] %= SecondOperand(instruction);
+                            break;
+                        case "eql":
+                            Registers[instruction.DestRegister] = (Registers[instruction.DestRegister] == SecondOperand(instruction)) ? 1 : 0;
+                            break;
+                        case "set":
+                            Registers[instruction.DestRegister] = SecondOperand(instruction);
+                            break;
+                        case "nop":
+                            break;
+                        default:
+                            throw new ArgumentException("Unknow operation", $"{instruction.Operation}");
+                            break;
+                    }
+                }
+                return this;
+            }
+
             public override string ToString()
             {
-                return $"w = {Registers[0]}, x = {Registers[1]}, y = {Registers[2]}, z = {Registers[3]}, II = {InputIndex}";
+                return $"i = {CumulativeInput} => w = {Registers[0]}, x = {Registers[1]}, y = {Registers[2]}, z = {Registers[3]}, ii = {InputIndex}";
             }
 
             public int GetNextInput(string input) => int.Parse(input[InputIndex++].ToString());
@@ -185,18 +231,36 @@ namespace AdventOfCode.Y2021
             // Run each sub-program on inputs of 1-9 and look at ALU state
             List<string> lines = Tools.GetLines(Input);
 
+            program = new();
+
             programs = new Program[NumInputDigits];
+            for (int i = 0; i < NumInputDigits; i++)
+                programs[i] = new();
+
             int inputStatementNumber = 0;
+            bool firstInputStatement = true;
 
             foreach (string line in lines)
             {
                 Instruction instruction = new Instruction(line);
-                if (instruction.Operation != Instruction.Comment)
-                    program.Add(instruction);
+                if (instruction.Operation == "inp")
+                {
+                    if (!firstInputStatement)
+                        inputStatementNumber++;
+                    else
+                        firstInputStatement = false;
+                    programs[inputStatementNumber].Instructions.Add(instruction);
+                    program.Instructions.Add(instruction);
+                }
+                else if (instruction.Operation != Instruction.Comment)
+                {
+                    programs[inputStatementNumber].Instructions.Add(instruction);
+                    program.Instructions.Add(instruction);
+                }
             }
         }
 
-        public long LargestValidSerialNumber()
+        public long OldInnerLoop()
         {
             const long ValidModelNumber = 0;
             long smallestOuput = Int64.MaxValue;
@@ -221,14 +285,55 @@ namespace AdventOfCode.Y2021
                         return i;
                 }
             }
-            return 0;
+            return -1; 
+        }
+
+        public long LargestValidSerialNumber()
+        {
+            return OldInnerLoop();
+        }
+
+        private void RunInputs(ALU alu, int stage, int depth)
+        {
+            ALU root;
+            if (stage == 0)
+                root = new();
+            else
+                root = new ALU(alu);
+
+            for (int digit = 1; digit <= 9; digit++)
+            {
+                ALU a = new ALU(root);
+                a.ExecuteOne(programs[stage], digit);
+                Console.WriteLine($"{new String(' ', stage * 3)}{a}");
+                if (stage < depth)
+                    RunInputs(a, stage + 1, depth);
+             }
+        }
+
+        private void WriteAllSubprograms()
+        {
+            string[] lines = new string[18];
+
+            for (int lnum = 0; lnum < 18; lnum++)
+            {
+                lines[lnum] = string.Empty;
+                for (int prog = 0; prog < NumInputDigits; prog++)
+                    lines[lnum] += $"{programs[prog].Instructions[lnum]}\t";
+            }
+            File.WriteAllLinesAsync("Programs.txt", lines);
         }
 
         [Description("What is the largest model number accepted by MONAD?")]
         public override string SolvePart1()
         {
+            Console.WriteLine("\n");
 
-            return LargestValidSerialNumber().ToString();
+            WriteAllSubprograms();
+
+            RunInputs(null, 0, 1 );
+
+            return string.Empty; //  LargestValidSerialNumber().ToString();
         }
 
         [Description("What is the largest model number accepted by MONAD?")]
