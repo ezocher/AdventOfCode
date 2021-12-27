@@ -12,7 +12,7 @@ https://adventofcode.com/
 ### Puzzles Completed
 | Year | Stars | Completed |
 | ---- | ----- | --------- |
-| 2021 | 44 :star: (AoC++)| 1-18, 20-23 |
+| 2021 | 45 :star: (AoC++)| 1-18, 20-23, 25.1 |
 
 ### Superlatives
 | | | |
