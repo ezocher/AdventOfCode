@@ -315,6 +315,7 @@ namespace AdventOfCode.Y2021
              }
         }
 
+        // Created Excel file Excel/Puzzle24-Subprograms-x14.xlsx with output from this method
         private void WriteAllSubprograms()
         {
             string[] lines = new string[18];
@@ -326,6 +327,31 @@ namespace AdventOfCode.Y2021
                     lines[lnum] += $"{programs[prog].Instructions[lnum]}\t";
             }
             File.WriteAllLinesAsync("Programs.txt", lines);
+        }
+
+        // Extract coefficients from the 14 stages in the Puzzle 24 input program
+        // Pasted this output into Puzzle24.cs to create A, B, and C int arrays
+        // Output:
+        //4: 1, 1, 1, 1, 26, 1, 1, 26, 1, 26, 26, 26, 26, 26,
+        //5: 12, 11, 10, 10, -16, 14, 12, -4, 15, -7, -8, -4, -15, -8,
+        //15: 6, 12, 5, 10, 7, 0, 4, 12, 14, 13, 10, 11, 9, 9,
+        private void ExtractCoefficientsFromPuzzleInput()
+        {
+            string[] output = new string[3];
+            int outIndex = 0;
+
+            int[] relevantInstructionIndexes = new int[] { 4, 5, 15 };
+            foreach (int instrIndex in relevantInstructionIndexes)
+            {
+                output[outIndex] = string.Empty;
+                for (int prog = 0; prog < NumInputDigits; prog++)
+                    output[outIndex] += $"{programs[prog].Instructions[instrIndex].SourceLiteral}, ";
+                outIndex++;
+            }
+
+            outIndex = 0;
+            foreach (int instrIndex in relevantInstructionIndexes)
+                Console.WriteLine($"{instrIndex}: {output[outIndex++]}");
         }
 
         [Description("What is the largest model number accepted by MONAD?")]
