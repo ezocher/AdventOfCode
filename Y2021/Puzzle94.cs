@@ -8,6 +8,8 @@ using System.IO;
 // Keeping the ALU from Puzzle 24 because it's cute and fun
 // Ended up solving Puzzzle 24 a completely different way
 
+// TODO: Move this into a new Puzzle24 folder
+
 namespace AdventOfCode.Y2021
 {
     public class Puzzle94 : ASolver 
