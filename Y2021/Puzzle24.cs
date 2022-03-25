@@ -38,6 +38,7 @@ namespace AdventOfCode.Y2021
         // Run from stage 13 down to stage 0
         private List<(long, int)> PreviousZ(long z, int stage)
         {
+            stagesRun++;
             List<(long, int)> pairs = new();
 
             long adjustedZ, previousZ;
@@ -58,11 +59,18 @@ namespace AdventOfCode.Y2021
                 //   so w == z % 26 + B is always true, which means C doesn't come into play because
                 //   C * x is always 0 because x is always 0
                 // This always finds 9 pairs
-                for (int w = MinW; w <= MaxW ; w++)
-                {
-                    previousZ = z * 26 + w - B[stage];
-                    pairs.Add((previousZ, w));
-                }
+                if (largestFirst)
+                    for (int w = MinW; w <= MaxW ; w++)
+                    {
+                        previousZ = z * 26 + w - B[stage];
+                        pairs.Add((previousZ, w));
+                    }
+                else
+                    for (int w = MaxW; w >= MinW; w--)
+                    {
+                        previousZ = z * 26 + w - B[stage];
+                        pairs.Add((previousZ, w));
+                    }
             }
             return pairs;
         }
@@ -104,7 +112,7 @@ namespace AdventOfCode.Y2021
                     {
                         found = true;
                         firstSolution = w.ToString() + digits;
-                        Console.WriteLine($"*** solution = {firstSolution}");
+                        Console.WriteLine($"*** solution = {firstSolution}, stages run = {stagesRun}");
                         return;
                     }
                 }
@@ -141,6 +149,7 @@ namespace AdventOfCode.Y2021
         }
 
         private bool largestFirst;
+        private long stagesRun;
 
         [Description("What is the largest model number accepted by MONAD?")]
         public override string SolvePart1()
@@ -148,6 +157,7 @@ namespace AdventOfCode.Y2021
             found = false;
             candidates = new();
             largestFirst = true;
+            stagesRun = 0;
 
             candidates.Push(("", 0, LastStage));
 
@@ -163,7 +173,20 @@ namespace AdventOfCode.Y2021
         [Description("What is the smallest model number accepted by MONAD?")]
         public override string SolvePart2()
         {
-            return string.Empty;
+            found = false;
+            candidates = new();
+            largestFirst = false;
+            stagesRun = 0;
+
+            candidates.Push(("", 0, LastStage));
+
+            while ((!found) && (candidates.Count > 0))
+            {
+                (string digits, long z, int stage) = candidates.Pop();
+                ReverseSearch(digits, z, stage);
+            }
+
+            return firstSolution.ToString();
         }
     }
 }
