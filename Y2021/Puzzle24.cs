@@ -80,15 +80,28 @@ namespace AdventOfCode.Y2021
 
             //DepthFirst(0, 0, 0);
 
-            found = false;
-            candidates = new();
-            candidates.Enqueue((0, 13, 0));
+            //found = false;
+            //candidates = new();
+            //candidates.Enqueue((0, 13, 0));
 
-            while ((!found) && (candidates.Count > 0))
-            {
-                (long z, long digits, int stage) = candidates.Dequeue();
-                ReverseSearch(z, digits, stage);
-            }
+            //while ((!found) && (candidates.Count > 0))
+            //{
+            //    (long z, long digits, int stage) = candidates.Dequeue();
+            //    ReverseSearch(z, digits, stage);
+            //}
+
+            //long z = 0;
+            int stage = 1;
+            for (long z = 7; z <= 15; z++)
+                for (int w = 1; w <= 9; w++)
+                    Console.WriteLine($"stage = {stage}, w = {z-6}{w}, z = {z}, next z = {NextZ(z, w, stage)}");
+            
+            //Random rand = new();
+            //for (int stage = 0; stage <= 13; stage++)
+            //{
+            //    int w = rand.Next(9) + 1;
+            //    Console.WriteLine($"stage = {stage}, w = {w}, next z = {z = NextZ(z, w, stage)}");
+            //}
             
             return largestSerial.ToString(); //  LargestValidSerialNumber().ToString();
         }
