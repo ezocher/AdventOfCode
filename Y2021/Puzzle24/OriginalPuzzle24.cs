@@ -10,7 +10,7 @@ using System.IO;
 
 namespace AdventOfCode.Y2021
 {
-    public class Puzzle24Original: ASolver 
+    public class OriginalPuzzle24: ASolver 
     {
         private Program program;
         private Program[] programs;
@@ -225,7 +225,7 @@ namespace AdventOfCode.Y2021
             public static char RegisterNameOf(int i) => (char)(i + FirstRegisterName);
         }
         
-        public Puzzle24Original(string input) : base(input) { Name = "Arithmetic Logic Unit"; }
+        public OriginalPuzzle24(string input) : base(input) { Name = "Arithmetic Logic Unit"; }
 
         const int NumInputDigits = 14;
         public override void Setup()

@@ -9,9 +9,9 @@ using System.IO;
 
 namespace AdventOfCode.Y2021
 {
-    public class Puzzle24SecondVersion : ASolver 
+    public class SecondVersionPuzzle24 : ASolver 
     {
-        public Puzzle24SecondVersion(string input) : base(input) { Name = "Arithmetic Logic Unit"; }
+        public SecondVersionPuzzle24(string input) : base(input) { Name = "Arithmetic Logic Unit"; }
 
         const int NumInputDigits = 14;
 
