@@ -15,7 +15,7 @@ namespace AdventOfCode.Y2021
 
         const int NumInputDigits = 14;
 
-        // Extracted from puzzle24--.txt using ExtractCoefficientsFromPuzzleInput() in Puzzle94.cs
+        // Extracted from puzzle24--.txt using ExtractCoefficientsFromPuzzleInput() in Puzzle24Original.cs
         static readonly int[] A = new int[] { 1, 1, 1, 1, 26, 1, 1, 26, 1, 26, 26, 26, 26, 26 };
         static readonly int[] B = new int[] { 12, 11, 10, 10, -16, 14, 12, -4, 15, -7, -8, -4, -15, -8 };
         static readonly int[] C = new int[] { 6, 12, 5, 10, 7, 0, 4, 12, 14, 13, 10, 11, 9, 9 };
