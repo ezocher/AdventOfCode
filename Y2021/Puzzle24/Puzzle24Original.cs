@@ -8,8 +8,6 @@ using System.IO;
 // Keeping the ALU from Puzzle 24 because it's cute and fun
 // Ended up solving Puzzzle 24 a completely different way
 
-// TODO: Move this into a new Puzzle24 folder
-
 namespace AdventOfCode.Y2021
 {
     public class Puzzle24Original: ASolver 
@@ -232,8 +230,6 @@ namespace AdventOfCode.Y2021
         const int NumInputDigits = 14;
         public override void Setup()
         {
-            // TODO: Break the program into sub-programs starting with each inp statement
-            // Run each sub-program on inputs of 1-9 and look at ALU state
             List<string> lines = Tools.GetLines(Input);
 
             program = new();

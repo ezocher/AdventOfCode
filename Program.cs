@@ -15,14 +15,14 @@ namespace AdventOfCode
 
             const int Year = 2021;
             const int Day = 24;
-            const bool Solved = false;
+            const bool Solved = true;
 
             // Before puzzle release:
             // * Log in to AoC and verify/update session cookie (if necessary)
 
             // At puzzle release:
             //   Get input and description and generate puzzle class file and empty test input file
-            //   (this returns quickly if files have already been downloaded/generated)
+            //   (this returns immediately if files have already been downloaded/generated)
             Infrastructure.GetInputGeneratePuzzleTemplate(SESSION, Year, Day);
 
             // Developing and running solution:

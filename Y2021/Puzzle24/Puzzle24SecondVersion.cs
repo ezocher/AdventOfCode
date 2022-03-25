@@ -5,16 +5,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
-// Keeping the ALU from Puzzle 24 because it's cute and fun
-// Ended up solving Puzzzle 24 a completely different way
+// A second/intermediate version of Puzzle 24 comingled with the final solution
+
 namespace AdventOfCode.Y2021
 {
-    public class Puzzle24 : ASolver 
+    public class Puzzle24SecondVersion : ASolver 
     {
-        public Puzzle24(string input) : base(input) { Name = "Arithmetic Logic Unit"; }
+        public Puzzle24SecondVersion(string input) : base(input) { Name = "Arithmetic Logic Unit"; }
+
+        const int NumInputDigits = 14;
 
         const int MinW = 1, MaxW = 9;
-        const int LastStage = 13;
 
         // Extracted from puzzle24--.txt using ExtractCoefficientsFromPuzzleInput() in Puzzle24Original.cs
         static readonly int[] A = new int[] {  1,  1,  1,  1,  26,  1,  1, 26,  1, 26, 26, 26,  26, 26 };
@@ -22,9 +23,9 @@ namespace AdventOfCode.Y2021
         static readonly int[] C = new int[] {  6, 12,  5, 10,   7,  0,  4, 12, 14, 13, 10, 11,   9,  9 };
         // In stages where A = 1 and B >= 10, z always increases ("Up stages")
         // In stages where A = 26 and B is negative, z can decrease depending on value of w ("Down stages")
-        // There are 7 up stages and 7 down stages, so down stages must always decrease z
+        // There are 7 up stages and 7 down stages, so down stages must always decrease z (TODO: confirm, may only need 6 down)
 
-        // Run from stage 0 up to 13 - No longer used - kept in final solution for reference
+        // Run from stage 0 up to 13 - No longer used
         private long NextZ(long z, int w, int stage)
         {
             long z1 = z / A[stage];
@@ -92,13 +93,7 @@ namespace AdventOfCode.Y2021
         bool found;
         string firstSolution;
 
-        public override void Setup()
-        {
-            found = false;
-            candidates = new();
-            candidates.Push(("", 0, LastStage));
-            stagesRun = 0;
-        }
+        public override void Setup() { }
 
         private void ReverseSearch(string digits, long z, int stage)
         {
@@ -126,13 +121,45 @@ namespace AdventOfCode.Y2021
             }
         }
 
+        // No longer used
+        const int LastStage = 13;
+        static long lowestZ;
+        static long firstZero;
+        private void DepthFirst(int stage, long z, long parent)
+        {
+            if (firstZero > 0) return;
+
+            for (int w = 9; w >= 1; w--)
+            {
+                long digits = parent * 10 + w;
+                long zNext = NextZ(z, w, stage);
+                if (stage == LastStage)
+                {
+                    if (zNext == 0)
+                        firstZero = digits;
+                    else if (zNext < lowestZ)
+                    {
+                        lowestZ = zNext;
+                        Console.WriteLine($"New lowest z = {zNext} at input: {digits}");
+                    }
+                }
+                else
+                    DepthFirst(stage + 1, zNext, digits);
+            }
+        }
+
         private bool largestFirst;
         private long stagesRun;
 
         [Description("What is the largest model number accepted by MONAD?")]
         public override string SolvePart1()
         {
+            found = false;
+            candidates = new();
             largestFirst = true;
+            stagesRun = 0;
+
+            candidates.Push(("", 0, LastStage));
 
             while ((!found) && (candidates.Count > 0))
             {
@@ -146,8 +173,12 @@ namespace AdventOfCode.Y2021
         [Description("What is the smallest model number accepted by MONAD?")]
         public override string SolvePart2()
         {
-            Setup();
+            found = false;
+            candidates = new();
             largestFirst = false;
+            stagesRun = 0;
+
+            candidates.Push(("", 0, LastStage));
 
             while ((!found) && (candidates.Count > 0))
             {
