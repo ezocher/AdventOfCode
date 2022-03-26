@@ -14,10 +14,8 @@ namespace AdventOfCode.Y2021
 
             public IntPoint3D(string s)
             {
-                List<int> numbers = new List<int>(Parse.LineOfDelimitedInts(s, ","));
-                X = numbers[0];
-                Y = numbers[1];
-                Z = numbers[2];
+                List<int> n = new List<int>(Parse.LineOfDelimitedInts(s, ","));
+                X = n[0]; Y = n[1]; Z = n[2];
             }
 
             public IntPoint3D(int x, int y, int z)
@@ -33,7 +31,7 @@ namespace AdventOfCode.Y2021
             public int IndexA;
             public int IndexB;
             IntPoint3D Delta;
-            public long DeltaProduct;      // 2000^3 > Int32.MaxValue
+            public float Distance;
             // Scanner ?
 
             public BeaconPair(int ia, int ib, IntPoint3D a, IntPoint3D b)
@@ -41,7 +39,7 @@ namespace AdventOfCode.Y2021
                 IndexA = ia;
                 IndexB = ib;
                 Delta = new IntPoint3D(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y), Math.Abs(a.Z - b.Z));
-                DeltaProduct = (long)Delta.X * Delta.Y * Delta.Z;
+                Distance = (float)Math.Sqrt(Delta.X * Delta.X + Delta.Y * Delta.Y + Delta.Z * Delta.Z);
             }
 
             public static bool PairsMatch(BeaconPair pairA, BeaconPair pairB)
@@ -53,8 +51,7 @@ namespace AdventOfCode.Y2021
                 return ((deltasA[0] == deltasB[0]) && (deltasA[1] == deltasB[1]) && (deltasA[2] == deltasB[2]));
             }
 
-            public override string ToString() => $"{DeltaProduct}: [{IndexA}] <=> [{IndexB}]";
-
+            public override string ToString() => $"{Distance:F2}: [{IndexA}] <=> [{IndexB}]";
         }
 
         struct ScannerPair
@@ -66,6 +63,7 @@ namespace AdventOfCode.Y2021
             List<(int, int, int, int)> MatchedBeaconPairsIndexes;
             public int MatchedBeaconCount;
 
+            // TODO: Verify this
             public ScannerPair(int iAlpha, int iBeta, Scanner alpha, Scanner beta)
             {
                 IndexAlpha = iAlpha; IndexBeta = iBeta;
@@ -77,7 +75,7 @@ namespace AdventOfCode.Y2021
 
                 while ((iA < alpha.BeaconPairs.Count) && (iB < beta.BeaconPairs.Count))
                 {
-                    if (alpha.BeaconPairs[iA].DeltaProduct == beta.BeaconPairs[iB].DeltaProduct)
+                    if (alpha.BeaconPairs[iA].Distance == beta.BeaconPairs[iB].Distance)
                     {
                         if (BeaconPair.PairsMatch(alpha.BeaconPairs[iA], beta.BeaconPairs[iB]))
                         {
@@ -91,7 +89,7 @@ namespace AdventOfCode.Y2021
                         }
                         iA++; iB++;
                     }
-                    else if (alpha.BeaconPairs[iA].DeltaProduct > beta.BeaconPairs[iB].DeltaProduct)
+                    else if (alpha.BeaconPairs[iA].Distance > beta.BeaconPairs[iB].Distance)
                         iB++;
                     else
                         iA++;
@@ -121,7 +119,7 @@ namespace AdventOfCode.Y2021
                 for (int a = 0; a < Beacons.Count; a++)
                     for (int b = a + 1; b < Beacons.Count; b++)
                         BeaconPairs.Add(new BeaconPair(a, b, Beacons[a], Beacons[b]));
-                BeaconPairs.Sort((s1, s2) => s1.DeltaProduct.CompareTo(s2.DeltaProduct));
+                BeaconPairs.Sort((s1, s2) => s1.Distance.CompareTo(s2.Distance));
 
                 OverlappingScannerIndexes = new();
             }
@@ -129,7 +127,7 @@ namespace AdventOfCode.Y2021
 
         private List<Scanner> scanners;
         private bool[] mappedScanners;
-        private List<ScannerPair> scannerPairs;
+        private List<ScannerPair> overlappingScannerPairs;
         private HashSet<string> recordedBeacons;
 
         public Puzzle19(string input) : base(input) { Name = "Beacon Scanner"; }
@@ -153,12 +151,12 @@ namespace AdventOfCode.Y2021
             }
             scanners.Add(new Scanner(beacons));
 
-            scannerPairs = new();
+            overlappingScannerPairs = new();
             mappedScanners = new bool[scanners.Count];
             recordedBeacons = new();
         }
 
-        private void CompareAllScanners()
+        private void CompareScanners()
         {
             const int MatchThreshold = 12;
 
@@ -166,9 +164,9 @@ namespace AdventOfCode.Y2021
                 for (int b = a + 1; b < scanners.Count; b++)
                 {
                     ScannerPair sp = new ScannerPair(a, b, scanners[a], scanners[b]);
-                    scannerPairs.Add(sp);
                     if (sp.MatchedBeaconCount >= MatchThreshold)
                     {
+                        overlappingScannerPairs.Add(sp);
                         scanners[a].OverlappingScannerIndexes.Add(b);
                         scanners[b].OverlappingScannerIndexes.Add(a);
                     }
@@ -184,8 +182,8 @@ namespace AdventOfCode.Y2021
         [Description("How many beacons are there?")]
         public override string SolvePart1()
         {
-            CompareAllScanners();
-            AddBeacons(scanners[0]);
+            CompareScanners();
+            //AddBeacons(scanners[0]);
 
             return recordedBeacons.Count.ToString();
         }
