@@ -66,6 +66,8 @@ namespace AdventOfCode.Y2021
                 return ((deltasA[0] == deltasB[0]) && (deltasA[1] == deltasB[1]) && (deltasA[2] == deltasB[2]));
             }
 
+            public bool RepeatDeltaValues() => ((Delta.X == Delta.Y) || (Delta.Y == Delta.Z) || (Delta.X == Delta.Z));
+
             public override string ToString() => $"{Distance:F2}: [{IndexA}] <=> [{IndexB}]";
         }
 
@@ -114,7 +116,7 @@ namespace AdventOfCode.Y2021
             public int IndexBeta;
             bool[] MatchedBeaconsAlpha;
             bool[] MatchedBeaconsBeta;
-            List<(int, int, int, int)> MatchedBeaconPairsIndexes;
+            List<(int, int)> MatchedBeaconPairsIndexes;
             public int MatchedBeaconCount;
 
             // TODO: Verify this
@@ -133,13 +135,11 @@ namespace AdventOfCode.Y2021
                     {
                         if (BeaconPair.PairsMatch(alpha.BeaconPairs[iA], beta.BeaconPairs[iB]))
                         {
-                            int i1 = alpha.BeaconPairs[iA].IndexA;
-                            int i2 = alpha.BeaconPairs[iA].IndexB;
-                            int i3 = beta.BeaconPairs[iB].IndexA;
-                            int i4 = beta.BeaconPairs[iB].IndexB;
-                            MatchedBeaconPairsIndexes.Add((i1, i2, i3, i4));
-                            MatchedBeaconsAlpha[i1] = MatchedBeaconsAlpha[i2] = true;
-                            MatchedBeaconsBeta[i3] = MatchedBeaconsBeta[i4] = true;
+                            MatchedBeaconPairsIndexes.Add((iA, iB));
+                            MatchedBeaconsAlpha[alpha.BeaconPairs[iA].IndexA] = true;
+                            MatchedBeaconsAlpha[alpha.BeaconPairs[iA].IndexB] = true;
+                            MatchedBeaconsBeta[beta.BeaconPairs[iB].IndexA] = true;
+                            MatchedBeaconsBeta[beta.BeaconPairs[iB].IndexB] = true;
                         }
                         iA++; iB++;
                     }
@@ -223,6 +223,19 @@ namespace AdventOfCode.Y2021
             return new Transform(666);
         }
 
+        // Find next scanner which has been remapped, but whose list of children haven't been
+        private Scanner NextBaseScanner()
+        {
+            int i = 1;
+            while (!remappedScanners[i] || scanners[i].OverlappingScannersRemapped)
+            {
+                i++;
+                if (i == scanners.Count)
+                    return null;
+            }
+            return scanners[i];
+        }
+
         private void RemapAllScannerCoordinates(Scanner startingScanner)
         {
             Scanner baseScanner = startingScanner;
@@ -232,11 +245,7 @@ namespace AdventOfCode.Y2021
                 foreach (var scannerPair in baseScanner.OverlappingScanners)
                     RemapCoordinates(scannerPair, baseScanner);
                 baseScanner.OverlappingScannersRemapped = true;
-
-                int i = 0;
-                while (!remappedScanners[i] || scanners[i].OverlappingScannersRemapped)
-                    i++;
-                baseScanner = scanners[i];
+                baseScanner = NextBaseScanner();
             }
         }
 
@@ -258,6 +267,7 @@ namespace AdventOfCode.Y2021
 
             return recordedBeacons.Count.ToString();
         }
+
 
         [Description("How many beacons are there?")]
         public override string SolvePart2()
